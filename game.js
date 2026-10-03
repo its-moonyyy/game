@@ -451,10 +451,11 @@ function drawWin() {
    Game loop (requestAnimationFrame)
    ========================================================= */
 let last = performance.now();
+let simEnabled = true;   // guest mode disables simulation but keeps drawing
 function frame(now) {
   const dt = Math.min((now - last) / 1000, 1 / 30);  // clamp long frames
   last = now;
-  update(dt);
+  if (simEnabled) update(dt);
   drawSky();
   drawPit();
   drawSolids();
@@ -468,3 +469,42 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+/* =========================================================
+   Multiplayer hooks (snapshots + remote input, no physics here)
+   ========================================================= */
+function getSnapshot() {
+  return {
+    players: players.map((p) => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy })),
+    block: { x: block.x, y: block.y, vy: block.vy },
+    openAmt,
+    switches: SWITCHES.map((s) => s.pressed),
+    won,
+  };
+}
+
+function applySnapshot(s) {
+  s.players.forEach((sp, i) => {
+    players[i].x = sp.x; players[i].y = sp.y;
+    players[i].vx = sp.vx; players[i].vy = sp.vy;
+  });
+  block.x = s.block.x; block.y = s.block.y; block.vy = s.block.vy;
+  openAmt = s.openAmt;
+  s.switches.forEach((pressed, i) => { SWITCHES[i].pressed = pressed; });
+  won = s.won;
+}
+
+function setRemoteInput(i, input) {
+  const p = players[i];
+  keys[p.cfg.left] = !!input.left;
+  keys[p.cfg.right] = !!input.right;
+  if (input.jump) p.jumpBuf = 0.15;
+}
+
+function setSimEnabled(on) {
+  simEnabled = !!on;
+}
+
+if (typeof window !== 'undefined') {
+  window.Game = { getSnapshot, applySnapshot, setRemoteInput, setSimEnabled };
+}
