@@ -493,6 +493,7 @@ requestAnimationFrame(frame);
    ========================================================= */
 function getSnapshot() {
   return {
+    v: 1,
     players: players.map((p) => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy,
       dir: p.dir })),
     block: { x: block.x, y: block.y, vy: block.vy },

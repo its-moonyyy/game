@@ -6,7 +6,7 @@ const T = global.window.Net._test;
 
 assert.equal(T.snapshotIntervalMs, 33, 'snapshots run at 33ms');
 
-const snap = { players: [{ x: 0, y: 0, vx: 100, vy: 0 },
+const snap = { v: 1, players: [{ x: 0, y: 0, vx: 100, vy: 0 },
   { x: 50, y: 50, vx: 0, vy: 0 }],
   block: { x: 0, y: 0, vy: 0 }, openAmt: 0,
   switches: [false, false], won: false };

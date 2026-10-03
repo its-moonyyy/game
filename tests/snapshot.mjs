@@ -28,6 +28,7 @@ assert.ok(Game, 'window.Game exists');
 const s0 = Game.getSnapshot();
 assert.equal(s0.players[0].x, 80, 'P1 starts at spawn x');
 assert.equal(s0.players[0].dir, 1, 'snapshot carries facing');
+assert.equal(s0.v, 1, 'snapshot carries protocol version');
 
 const moved = JSON.parse(JSON.stringify(s0));
 moved.players[0].x = 100;

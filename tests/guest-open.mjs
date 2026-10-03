@@ -39,7 +39,7 @@ global.window.Game = {
 await import('../net.js');
 await import('../menu.js');
 
-const fixture = { players: [{ x: 11, y: 22, vx: 0, vy: 0 },
+const fixture = { v: 1, players: [{ x: 11, y: 22, vx: 0, vy: 0 },
   { x: 33, y: 44, vx: 0, vy: 0 }],
   block: { x: 1, y: 2, vy: 0 }, openAmt: 0.5,
   switches: [true, false], won: false };

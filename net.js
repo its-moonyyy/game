@@ -43,7 +43,8 @@
   }
 
   function validSnapshot(s) {
-    if (!s || !Array.isArray(s.players) || s.players.length !== 2) {
+    if (!s || s.v !== 1) return false;
+    if (!Array.isArray(s.players) || s.players.length !== 2) {
       return false;
     }
     for (const p of s.players) {

@@ -28,7 +28,7 @@ assert.throws(
   () => T.decodeInvite(b64url({ type: 'answer', sdp: 'y', id: 'q' }), 'offer'),
   /type/, 'wrong-type code rejected');
 
-const fixture = { players: [{ x: 1, y: 2, vx: 3, vy: 4 },
+const fixture = { v: 1, players: [{ x: 1, y: 2, vx: 3, vy: 4 },
   { x: 5, y: 6, vx: 7, vy: 8 }],
   block: { x: 9, y: 10, vy: 11 }, openAmt: 0.5,
   switches: [true, false], won: false };
@@ -58,5 +58,10 @@ T.setReady(false);
 T.injectState({ ...fixture, won: 'yes' });
 T.setReady(true);
 assert.equal(seen.length, 1, 'snapshot with bad won flag never delivered');
+T.setReady(false);
+const { v, ...unversioned } = fixture;
+T.injectState(unversioned);
+T.setReady(true);
+assert.equal(seen.length, 1, 'unversioned snapshot never delivered');
 
 console.log('netcode tests pass');
