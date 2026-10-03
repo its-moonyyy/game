@@ -24,6 +24,7 @@ function mount(container, mapping, onChange) {
 
   function press(action) {
     state[action] = true;
+    World.started = true;
     keys[mapping[action]] = true;
     if (action === 'jump') {
       for (const p of World.players) {

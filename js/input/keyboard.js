@@ -19,6 +19,7 @@ if (typeof window !== 'undefined' &&
   window.addEventListener('keydown', (e) => {
     const k = typeof e.key === 'string' ? e.key.toLowerCase() : '';
     if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+    World.started = true;
     if (!e.repeat) {
       const i = keyOwner(k);
       if (localPlayer !== null && i !== localPlayer) return;   // owned by the remote side

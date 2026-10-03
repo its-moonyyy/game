@@ -12,7 +12,7 @@ const GUEST_KEYS = { arrowleft: 'left', arrowright: 'right', arrowup: 'jump' };
 let role = null;
 let guestPlay = false;
 const guestInput = { ...NO_INPUT };
-let selectedLevel = 'level-1';
+let selectedLevel = 'mountain-1';
 
 function el(id) {
   return document.getElementById(id);
@@ -45,7 +45,9 @@ function mountPad(id, mapping, onChange) {
 }
 
 function selectedLevelFromUrl() {
-  if (typeof window === 'undefined' || !window.location) return 'level-1';
+  if (typeof window === 'undefined' || !window.location) {
+    return Levels.current().name;
+  }
   const name = new URLSearchParams(window.location.search).get('level');
   return Levels.get(name).name;
 }

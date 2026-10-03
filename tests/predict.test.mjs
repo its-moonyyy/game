@@ -18,6 +18,9 @@ test('prediction math: cadence, extrapolation, reconcile, merge', async () => {
   const e500 = T.extrapolate(snap, 500);
   assert.equal(e500.players[0].x, 15, 'extrapolation clamps at 150ms');
   assert.equal(e500.players[1].x, 50, 'still bodies stay put');
+  const noBlock = { ...snap, block: null };
+  assert.doesNotThrow(() => T.extrapolate(noBlock, 50),
+    'extrapolate tolerates missing crate');
 
   const near = T.reconcile({ x: 0, y: 0 }, { x: 10, y: 0 });
   assert.ok(near.x > 0 && near.x < 10, 'near prediction blends');

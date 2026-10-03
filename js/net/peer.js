@@ -15,7 +15,16 @@ function status(text) {
   }
 }
 
-function handleMessage(raw, handlers) {
+  function onStateMessage(msg) {
+    stat.recvState += 1;
+    if (Sync.pushSnapshot(msg.snap)) {
+      rejects = 0;
+    } else if ((rejects += 1) === 60) {
+      status('version mismatch: both players reload the page');
+    }
+  }
+
+  function handleMessage(raw, handlers) {
   let msg;
   try {
     msg = JSON.parse(raw);
@@ -48,6 +57,7 @@ function waitGathering(pc) {
 let pc = null;
 let channel = null;
 let timers = [];
+let rejects = 0;
 
 function cleanup() {
   for (const t of timers) clearInterval(t);
@@ -140,10 +150,7 @@ async function join(codeA) {
     };
     timers.push(setInterval(send, Sync.SNAP_MS));
     channel.onmessage = (e) => handleMessage(e.data, {
-      state: (msg) => {
-        stat.recvState += 1;
-        Sync.pushSnapshot(msg.snap);
-      },
+      state: onStateMessage,
     });
     channel.onopen = () => {
       status('connected');
@@ -179,6 +186,7 @@ Object.assign(api, { host, join, confirm, sendInput, leave,
   _test: { encodeInvite: Signaling.encodeInvite,
     decodeInvite: Signaling.decodeInvite, setReady: (on) => Sync.setReady(on, api.onState),
     injectState: Sync.pushSnapshot,
+    receive: (raw) => handleMessage(raw, { state: onStateMessage }),
     extrapolate: Sync.extrapolate, reconcile: Sync.reconcile,
     mergePrediction: Sync.mergePrediction,
     snapshotIntervalMs: Sync.SNAP_MS,

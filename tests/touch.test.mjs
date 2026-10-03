@@ -43,6 +43,7 @@ test('touch pad with keyboard parity and multi-touch', async () => {
 
   fire(buttons[0], 'touchstart', [{ identifier: 1 }]);
   assert.equal(keys.q, true, 'left press sets keys.q');
+  assert.equal(World.started, true, 'touch press starts the chrono');
   assert.deepEqual(changes.at(-1), { left: true, right: false, jump: false });
 
   fire(buttons[1], 'touchstart', [{ identifier: 2 }]);

@@ -5,6 +5,7 @@
 import { PW, PH, BW } from './config.js';
 import { CFG } from './config.js';
 import { Levels } from './levels/index.js';
+import { cam } from './render/view.js';
 
 export function buildWorld(level) {
   return {
@@ -30,11 +31,13 @@ export function buildWorld(level) {
 }
 
 let World = buildWorld(Levels.current());
+cam.y = World.level.h ? World.level.h - 540 : 0;
 
 export { World };
 
 export function resetWorld(name) {
   World = buildWorld(Levels.get(name));
+  cam.y = World.level.h ? World.level.h - 540 : 0;
 }
 
 export function getSnapshot() {

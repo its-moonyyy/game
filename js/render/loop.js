@@ -5,7 +5,7 @@ import { World } from '../world.js';
 import { updatePlayers, updateBlock } from '../sim/physics.js';
 import { updateSwitches, updateWin, updateCheckpoints, updateFallRespawn,
   updateSummit, updateChrono } from '../sim/rules.js';
-import { updateParts } from '../sim/particles.js';
+import { updateParts, burst } from '../sim/particles.js';
 import { stepRope } from '../sim/rope.js';
 import { updateCamera } from './camera.js';
 import { cam, rope } from './view.js';
@@ -21,11 +21,18 @@ let last = performance.now();
 export function update(dt) {
   for (const p of World.players) p.jumpBuf = Math.max(0, p.jumpBuf - dt);
   updatePlayers(dt);
-  if (World.level.checkpoints) {
+  if (World.level.h) {
     updateCheckpoints();
     updateFallRespawn();
     updateSummit();
     updateChrono(dt);
+    if (World.won) {
+      World.winT += dt;
+      const goal = World.level.goal;
+      if (World.winT < 3.2 && World.parts.length < 420) {
+        burst(goal.x + goal.w / 2, goal.y + goal.h / 2, 8);
+      }
+    }
   } else {
     updateBlock(dt);
     updateSwitches(dt);

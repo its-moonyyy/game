@@ -75,4 +75,21 @@ test('invite codes and snapshot queue validation', async () => {
   T.injectState(noGrab);
   T.setReady(true);
   assert.equal(seen.length, 1, 'snapshot without grab rejected');
+
+  const mountainWire = { v: 2,
+    players: [{ x: 1, y: 2, vx: 3, vy: 4, grab: false, stamina: 0 },
+      { x: 5, y: 6, vx: 7, vy: 8, grab: false, stamina: 0 }],
+    block: null, openAmt: 0, switches: [], won: false, level: 'mountain-1' };
+  T.setReady(false);
+  T.injectState(mountainWire);
+  T.setReady(true);
+  assert.equal(seen.length, 2, 'mountain wire shape accepted');
+
+  const statuses = [];
+  global.window.Menu = { setStatus: (t) => { statuses.push(t); } };
+  for (let i = 0; i < 70; i++) {
+    T.receive(JSON.stringify({ type: 'state', snap: { nope: true } }));
+  }
+  assert.ok(statuses.some((t) => /mismatch|reload|version/i.test(t)),
+    'repeated rejects warn about version mismatch');
 });

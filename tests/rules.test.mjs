@@ -1,25 +1,35 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { makeCtx, makeDocument, ALL_IDS } from './helpers.mjs';
+import { World } from '../js/world.js';
+
+let frameFn = null;
+const keyDown = [];
+const doc = makeDocument(ALL_IDS);
+global.document = doc;
+global.window = {
+  addEventListener(type, fn) { if (type === 'keydown') keyDown.push(fn); },
+};
+global.performance = { now: () => 1000 };
+global.requestAnimationFrame = (fn) => { frameFn = fn; };
+
+await import('../js/main.js');
+const { updateCheckpoints, updateFallRespawn, updateSummit,
+  updateChrono } = await import('../js/sim/rules.js');
+const Game = global.window.Game;
+
+const press = (key) => {
+  for (const fn of keyDown) fn({ key, repeat: false, preventDefault() {} });
+};
+let simT = 10000;
+const step = (n = 2) => {
+  for (let i = 0; i < n; i++) {
+    simT += 16;
+    frameFn(simT);
+  }
+};
 
 test('mountain rules: checkpoints, summit, chrono, fall, reset', async () => {
-  let frameFn = null;
-  const keyDown = [];
-  const doc = makeDocument(ALL_IDS);
-  global.document = doc;
-  global.window = {
-    addEventListener(type, fn) { if (type === 'keydown') keyDown.push(fn); },
-  };
-  global.performance = { now: () => 1000 };
-  global.requestAnimationFrame = (fn) => { frameFn = fn; };
-  const press = (key) => {
-    for (const fn of keyDown) fn({ key, repeat: false, preventDefault() {} });
-  };
-
-  await import('../js/main.js');
-  const { updateCheckpoints, updateFallRespawn, updateSummit,
-    updateChrono } = await import('../js/sim/rules.js');
-  const Game = global.window.Game;
   Game.resetWorld('mountain-1');
   doc.els['game-view'].hidden = false;
 
@@ -58,7 +68,9 @@ test('mountain rules: checkpoints, summit, chrono, fall, reset', async () => {
   updateChrono(16);
   updateChrono(16);
   assert.equal(Game.getSnapshot().timeMs, frozen, 'chrono freezes on win');
-
+  assert.equal(World.winT, 0, 'win effects start at zero');
+  step(10);
+  assert.ok(World.winT > 0, 'win flash advances on mountain');
   Game.resetRun();
   snap = Game.getSnapshot();
   assert.equal(snap.timeMs, 0, 'reset zeroes chrono');
@@ -83,4 +95,13 @@ test('mountain rules: checkpoints, summit, chrono, fall, reset', async () => {
   snap = Game.getSnapshot();
   assert.equal(snap.players[0].x, 440, 'R restarts the run');
   assert.equal(snap.timeMs, 0, 'R zeroes the chrono');
+});
+
+test('loop branches on world height, not checkpoint presence', async () => {
+  Game.resetWorld('mountain-1');
+  World.level = { ...World.level, h: undefined, checkpoints: [] };
+  World.block = { x: 400, y: 100, w: 40, h: 40, vy: 0 };
+  step(5);
+  assert.ok(World.block.y > 100, 'old levels run block physics');
+  Game.resetWorld('mountain-1');
 });

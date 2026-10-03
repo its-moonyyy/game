@@ -20,12 +20,12 @@ function validSnapshot(s) {
       return false;
     }
   }
-  if (!s.block || !['x', 'y', 'vy']
-    .every((k) => typeof s.block[k] === 'number')) {
+  if (s.block !== null && (!s.block || !['x', 'y', 'vy']
+    .every((k) => typeof s.block[k] === 'number'))) {
     return false;
   }
   if (typeof s.openAmt !== 'number') return false;
-  if (!Array.isArray(s.switches) || s.switches.length !== 2 ||
+  if (!Array.isArray(s.switches) ||
     !s.switches.every((v) => typeof v === 'boolean')) {
     return false;
   }
@@ -37,12 +37,13 @@ function deliver(snap, onState) {
 }
 
 function pushSnapshot(snap) {
-  if (!validSnapshot(snap)) return;
+  if (!validSnapshot(snap)) return false;
   if (!guest.ready) {
     guest.queued = snap;
-    return;
+    return true;
   }
   guest.latest = { snap, at: clock() };
+  return true;
 }
 
 function extrapolate(snap, ageMs) {
@@ -52,7 +53,7 @@ function extrapolate(snap, ageMs) {
     p.x += p.vx * t;
     p.y += p.vy * t;
   }
-  out.block.y += out.block.vy * t;
+  if (out.block) out.block.y += out.block.vy * t;
   return out;
 }
 
