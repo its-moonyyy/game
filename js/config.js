@@ -12,6 +12,6 @@ export const PW = 36, PH = 40;      // player size
 export const BW = 40;               // pushable block size (square)
 
 export const CFG = [
-  { left: 'a', right: 'd', jump: 'w' },
-  { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' },
+  { left: 'q', right: 'd', jump: 'z' },
+  { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' },
 ];

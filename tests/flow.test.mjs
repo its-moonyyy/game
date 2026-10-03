@@ -55,9 +55,9 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
   ids['btn-local'].handlers.click();
   assert.equal(ids['game-view'].hidden, false, 'local shows game view');
   assert.equal(mounts.length, 2, 'local mounts two pads');
-  assert.deepEqual(mounts[0].mapping, { left: 'a', right: 'd', jump: 'w' });
+  assert.deepEqual(mounts[0].mapping, { left: 'q', right: 'd', jump: 'z' });
   assert.deepEqual(mounts[1].mapping,
-    { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' });
+    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' });
 
   ids['game-view'].hidden = true;
   ids['menu-view'].hidden = false;
@@ -70,7 +70,7 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
   global.window.Net.onOpen('host');
   assert.equal(ids['game-view'].hidden, false, 'host enters game on open');
   assert.equal(mounts.length, 1, 'host mounts one pad');
-  assert.deepEqual(mounts[0].mapping, { left: 'a', right: 'd', jump: 'w' });
+  assert.deepEqual(mounts[0].mapping, { left: 'q', right: 'd', jump: 'z' });
   global.window.Net.onClose('host');
   assert.deepEqual(remoteInputs.at(-1),
     [1, { left: false, right: false, jump: false }],

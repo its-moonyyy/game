@@ -44,5 +44,5 @@ test('guest open applies queued snapshot as prediction base', async () => {
     'queued snapshot becomes prediction base');
   assert.equal(mounts.length, 1, 'guest mounts one pad');
   assert.deepEqual(mounts[0].mapping,
-    { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' });
+    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' });
 });

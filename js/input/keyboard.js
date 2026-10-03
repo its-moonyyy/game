@@ -17,19 +17,21 @@ function keyOwner(key) {
 if (typeof window !== 'undefined' &&
   typeof window.addEventListener === 'function') {
   window.addEventListener('keydown', (e) => {
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    const k = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
     if (!e.repeat) {
-      const i = keyOwner(e.key);
+      const i = keyOwner(k);
       if (localPlayer !== null && i !== localPlayer) return;   // owned by the remote side
-      keys[e.key] = true;
+      keys[k] = true;
       for (const p of World.players) {
-        if (p.cfg.jump === e.key) p.jumpBuf = 0.15;   // queue a jump
+        if (p.cfg.jump === k) p.jumpBuf = 0.15;   // queue a jump
       }
     }
   });
   window.addEventListener('keyup', (e) => {
-    if (localPlayer === null || keyOwner(e.key) === localPlayer) {
-      keys[e.key] = false;
+    const k = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+    if (localPlayer === null || keyOwner(k) === localPlayer) {
+      keys[k] = false;
     }
   });
   window.addEventListener('blur', () => {

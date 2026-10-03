@@ -27,7 +27,7 @@ test('touch pad with keyboard parity and multi-touch', async () => {
 
   const changes = [];
   const ok = global.window.TouchPad.mount(container,
-    { left: 'a', right: 'd', jump: 'w' },
+    { left: 'q', right: 'd', jump: 'z' },
     (input) => { changes.push({ ...input }); });
   assert.equal(ok, true, 'mount returns true on touch device');
   assert.equal(container.children.length, 3, 'three buttons created');
@@ -42,12 +42,12 @@ test('touch pad with keyboard parity and multi-touch', async () => {
   }
 
   fire(buttons[0], 'touchstart', [{ identifier: 1 }]);
-  assert.equal(keys.a, true, 'left press sets keys.a');
+  assert.equal(keys.q, true, 'left press sets keys.q');
   assert.deepEqual(changes.at(-1), { left: true, right: false, jump: false });
 
   fire(buttons[1], 'touchstart', [{ identifier: 2 }]);
   fire(buttons[0], 'touchend', [{ identifier: 1 }]);
-  assert.equal(keys.a, false, 'left release clears keys.a');
+  assert.equal(keys.q, false, 'left release clears keys.q');
   assert.equal(keys.d, true, 'right finger still held');
 
   fire(buttons[2], 'touchstart', [{ identifier: 3 }]);

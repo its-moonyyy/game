@@ -5,10 +5,10 @@
 import { Clipboard } from './clipboard.js';
 import { Levels } from '../levels/index.js';
 
-const P1_MAP = { left: 'a', right: 'd', jump: 'w' };
-const P2_MAP = { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' };
+const P1_MAP = { left: 'q', right: 'd', jump: 'z' };
+const P2_MAP = { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' };
 const NO_INPUT = { left: false, right: false, jump: false };
-const GUEST_KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'jump' };
+const GUEST_KEYS = { arrowleft: 'left', arrowright: 'right', arrowup: 'jump' };
 let role = null;
 let guestPlay = false;
 const guestInput = { ...NO_INPUT };
@@ -133,7 +133,8 @@ function sendGuestInput() {
 
 function guestKey(e, down) {
   if (!guestPlay) return;
-  const action = GUEST_KEYS[e.key];
+  const k = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+  const action = GUEST_KEYS[k];
   if (!action) return;
   if (typeof e.preventDefault === 'function') e.preventDefault();
   guestInput[action] = down;
