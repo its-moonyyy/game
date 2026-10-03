@@ -44,15 +44,19 @@ Only the authority simulates.
 - Host (online): host pad/keyboard drives P1; guest inputs arriving
   over the data channel drive P2 with jump-buffering preserved. The
   host runs `update(dt)`, draws locally, and broadcasts a snapshot
-  20 times per second (both players' position and velocity, crate
+  30 times per second (both players' position and velocity, crate
   position and velocity, gate `openAmt`, switch states, win flags;
   about 200 bytes of JSON).
 - Guest (online): the local pad sends `{left, right, jump}` plus a
-  sequence number on every input change and on a 20 Hz heartbeat.
-  The guest runs no simulation; each received snapshot is applied and
-  rendered, with linear interpolation between the last two snapshots
-  by render timestamp for smooth motion. The guest's own player lags about one round trip behind its
-  fingers; the menu help text says so.
+  sequence number on every input change and on a 33 Hz heartbeat.
+  The guest runs its own simulation for immediate feedback and
+  reconciles it against host snapshots arriving at 33 Hz: P1, the
+  crate, switches, and flags follow the server (positions
+  extrapolated by velocity and age, clamped at 150 ms), while P2
+  keeps its locally predicted position, blending toward the server
+  when close and snapping when diverged by more than 36 px. The
+  guest's own player therefore reacts within a frame instead of a
+  full round trip; the menu help text still notes the residual lag.
 - Invite-code flow: Host game creates an offer and shows CODE-A. Join
   game pastes CODE-A and shows CODE-B. The host pastes CODE-B, the
   channel opens, and both sides enter the game view automatically.

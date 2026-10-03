@@ -48,8 +48,9 @@ assert.equal(applied.length, 0, 'nothing applied before ready');
 
 global.window.Net.onOpen('guest');
 assert.equal(ids['game-view'].hidden, false, 'guest enters game view');
-assert.deepEqual(applied.at(-1), fixture,
-  'queued snapshot applied on guest open');
+assert.deepEqual(applied, [], 'wiring leaves P2 to prediction');
+assert.deepEqual(global.window.Net._test.latest(), fixture,
+  'queued snapshot becomes prediction base');
 assert.equal(mounts.length, 1, 'guest mounts one pad');
 assert.deepEqual(mounts[0].mapping,
   { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' });

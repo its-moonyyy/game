@@ -129,11 +129,10 @@
       guestPlay = true;
       guestInput.left = guestInput.right = guestInput.jump = false;
       if (window.Game) {
-        window.Game.setSimEnabled(false);
+        window.Game.setSimEnabled(true);
         window.Game.setLocalPlayer(-1);
       }
       if (window.Net) {
-        window.Net.onState = (snap) => window.Game.applySnapshot(snap);
         window.Net.ready(true);
       }
       mountPad('pad-p1', P2_MAP, (input) => window.Net.sendInput(input));

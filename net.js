@@ -63,8 +63,9 @@
     return typeof s.won === 'boolean';
   }
 
-  const guest = { ready: false, queued: null, prev: null, next: null,
-    active: false };
+  const SNAP_MS = 33;
+  const guest = { ready: false, queued: null, latest: null, active: false };
+  let lastLocal = { left: false, right: false, jump: false };
   const stat = { sentInput: 0, recvInput: 0, sentState: 0, recvState: 0 };
   const api = { onState: null, onOpen: null, onClose: null };
   let role = null;
@@ -79,34 +80,43 @@
       guest.queued = snap;
       return;
     }
-    guest.prev = guest.next;
-    guest.next = { snap, at: clock() };
-    if (!guest.prev) guest.prev = guest.next;
+    guest.latest = { snap, at: clock() };
   }
 
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
+  function extrapolate(snap, ageMs) {
+    const t = Math.min(Math.max(ageMs, 0), 150) / 1000;
+    const out = JSON.parse(JSON.stringify(snap));
+    for (const p of out.players) {
+      p.x += p.vx * t;
+      p.y += p.vy * t;
+    }
+    out.block.y += out.block.vy * t;
+    return out;
   }
 
-  function lerpSnapshot(prev, next, t) {
-    const out = JSON.parse(JSON.stringify(next));
-    for (let i = 0; i < out.players.length; i++) {
-      for (const k of ['x', 'y']) {
-        out.players[i][k] = lerp(prev.players[i][k], next.players[i][k], t);
-      }
-    }
-    for (const k of ['x', 'y']) {
-      out.block[k] = lerp(prev.block[k], next.block[k], t);
-    }
+  function reconcile(local, host) {
+    const dx = host.x - local.x;
+    const dy = host.y - local.y;
+    if (dx * dx + dy * dy > 36 * 36) return { x: host.x, y: host.y };
+    return { x: local.x + dx * 0.35, y: local.y + dy * 0.35 };
+  }
+
+  function mergePrediction(localSnap, serverSnap, ageMs) {
+    const fresh = extrapolate(serverSnap, ageMs);
+    const out = JSON.parse(JSON.stringify(fresh));
+    out.players[1] = { ...fresh.players[1],
+      ...reconcile(localSnap.players[1], fresh.players[1]) };
     return out;
   }
 
   function guestFrame() {
     if (!guest.active) return;
-    if (guest.prev && guest.next) {
-      const span = Math.max(1, guest.next.at - guest.prev.at);
-      const t = Math.min(1, Math.max(0, (clock() - guest.prev.at) / span));
-      deliver(lerpSnapshot(guest.prev.snap, guest.next.snap, t));
+    if (guest.latest && window.Game) {
+      const local = window.Game.getSnapshot();
+      const merged = mergePrediction(local, guest.latest.snap,
+        clock() - guest.latest.at);
+      window.Game.applySnapshot(merged);
+      window.Game.setRemoteInput(1, lastLocal);
     }
     requestAnimationFrame(guestFrame);
   }
@@ -116,10 +126,9 @@
     if (guest.ready && guest.queued) {
       const snap = guest.queued;
       guest.queued = null;
-      guest.prev = null;
-      guest.next = null;
+      guest.latest = null;
       pushSnapshot(snap);
-      if (guest.next) deliver(guest.next.snap);
+      if (guest.latest) deliver(guest.latest.snap);
     }
   }
 
@@ -171,8 +180,7 @@
     guest.active = false;
     guest.ready = false;
     guest.queued = null;
-    guest.prev = null;
-    guest.next = null;
+    guest.latest = null;
     role = null;
   }
 
@@ -212,13 +220,13 @@
     const connected = open.then(() => {
       status('connected');
       if (typeof api.onOpen === 'function') api.onOpen('host');
-    timers.push(setInterval(() => {
-      if (channel && channel.readyState === 'open' && window.Game) {
-        stat.sentState += 1;
-        channel.send(JSON.stringify({ type: 'state',
-          snap: window.Game.getSnapshot() }));
-      }
-    }, 50));
+      timers.push(setInterval(() => {
+        if (channel && channel.readyState === 'open' && window.Game) {
+          stat.sentState += 1;
+          channel.send(JSON.stringify({ type: 'state',
+            snap: window.Game.getSnapshot() }));
+        }
+      }, SNAP_MS));
     });
     return { code, connected };
   }
@@ -244,8 +252,12 @@
             seq, input: lastInput }));
         }
       };
-      api.send = (input) => { lastInput = { ...input }; send(); };
-      timers.push(setInterval(send, 50));
+      api.send = (input) => {
+        lastInput = { ...input };
+        lastLocal = { ...input };
+        send();
+      };
+      timers.push(setInterval(send, SNAP_MS));
       channel.onmessage = (e) => handleMessage(e.data, {
         state: (msg) => {
           stat.recvState += 1;
@@ -277,13 +289,16 @@
   }
 
   function sendInput(input) {
+    lastLocal = { ...input };
     if (typeof api.send === 'function') api.send(input);
   }
 
   Object.assign(api, { host, join, confirm, sendInput, leave,
     ready: (on) => setReady(on),
     _test: { encodeInvite, decodeInvite, setReady,
-      injectState: pushSnapshot, lerp: lerpSnapshot,
+      injectState: pushSnapshot, extrapolate, reconcile, mergePrediction,
+      snapshotIntervalMs: SNAP_MS,
+      latest: () => guest.latest && guest.latest.snap,
       stat: () => ({ ...stat }),
       conn: () => ({ pc: pc && pc.connectionState,
         channel: channel && channel.readyState }),
