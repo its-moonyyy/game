@@ -17,7 +17,10 @@ global.document = {
   getElementById(id) {
     return { 'menu-view': menuView, 'game-view': gameView,
       'menu-status': statusEl, 'btn-local': localBtn,
-      'btn-host': hostBtn, 'btn-join': joinBtn }[id] || null;
+      'btn-host': hostBtn, 'btn-join': joinBtn,
+      'btn-connect': makeEl(), 'invite-out': makeEl(),
+      'invite-in': makeEl(), 'pad-p1': makeEl(),
+      'pad-p2': makeEl() }[id] || null;
   },
   addEventListener() {},
 };

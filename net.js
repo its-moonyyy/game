@@ -58,7 +58,8 @@
   const guest = { ready: false, queued: null, prev: null, next: null,
     active: false };
   const stat = { sentInput: 0, recvInput: 0, sentState: 0, recvState: 0 };
-  const api = { onState: null };
+  const api = { onState: null, onOpen: null, onClose: null };
+  let role = null;
 
   function deliver(snap) {
     if (typeof api.onState === 'function') api.onState(snap);
@@ -160,6 +161,11 @@
       pc = null;
     }
     guest.active = false;
+    guest.ready = false;
+    guest.queued = null;
+    guest.prev = null;
+    guest.next = null;
+    role = null;
   }
 
   function leave() {
@@ -186,13 +192,18 @@
         }
       },
     });
-    channel.onclose = () => status('guest disconnected, waiting');
+    channel.onclose = () => {
+      status('guest disconnected, waiting');
+      if (typeof api.onClose === 'function') api.onClose('host');
+    };
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     await waitGathering(pc);
     const code = encodeInvite({ type: 'offer', sdp: pc.localDescription.sdp });
+    role = 'host';
     const connected = open.then(() => {
       status('connected');
+      if (typeof api.onOpen === 'function') api.onOpen('host');
     timers.push(setInterval(() => {
       if (channel && channel.readyState === 'open' && window.Game) {
         stat.sentState += 1;
@@ -214,6 +225,7 @@
     status('connecting');
     pc.ondatachannel = (e) => {
       channel = e.channel;
+      role = 'guest';
       let lastInput = { left: false, right: false, jump: false };
       let seq = 0;
       const send = () => {
@@ -232,8 +244,14 @@
           pushSnapshot(msg.snap);
         },
       });
-      channel.onopen = () => status('connected');
-      channel.onclose = () => status('host left');
+      channel.onopen = () => {
+        status('connected');
+        if (typeof api.onOpen === 'function') api.onOpen('guest');
+      };
+      channel.onclose = () => {
+        status('host left');
+        if (typeof api.onClose === 'function') api.onClose('guest');
+      };
     };
     await pc.setRemoteDescription({ type: 'offer', sdp: offer.sdp });
     const answer = await pc.createAnswer();
@@ -255,6 +273,7 @@
   }
 
   Object.assign(api, { host, join, confirm, sendInput, leave,
+    ready: (on) => setReady(on),
     _test: { encodeInvite, decodeInvite, setReady,
       injectState: pushSnapshot, lerp: lerpSnapshot,
       stat: () => ({ ...stat }),
