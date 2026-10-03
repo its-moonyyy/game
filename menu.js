@@ -73,6 +73,35 @@
     }).catch(fail);
   }
 
+  function hasClipboard() {
+    return typeof navigator !== 'undefined' &&
+      !!navigator.clipboard;
+  }
+
+  async function copyInvite() {
+    const box = el('invite-out');
+    if (hasClipboard()) {
+      try {
+        await navigator.clipboard.writeText(box.value);
+        setStatus('code copied');
+        return;
+      } catch (e) {}
+    }
+    if (typeof box.select === 'function') box.select();
+    setStatus('copy manually: code selected');
+  }
+
+  async function pasteInvite() {
+    if (hasClipboard()) {
+      try {
+        el('invite-in').value = await navigator.clipboard.readText();
+        setStatus('code pasted');
+        return;
+      } catch (e) {}
+    }
+    setStatus('paste manually into the box');
+  }
+
   function onOpen(openedRole) {
     el('net-overlay').hidden = true;
     show('game');
@@ -118,6 +147,8 @@
     el('btn-host').addEventListener('click', () => select('host'));
     el('btn-join').addEventListener('click', () => select('join'));
     el('btn-connect').addEventListener('click', connectPressed);
+    el('btn-copy').addEventListener('click', copyInvite);
+    el('btn-paste').addEventListener('click', pasteInvite);
     el('btn-exit').addEventListener('click', () => {
       el('net-overlay').hidden = true;
       show('menu');

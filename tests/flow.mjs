@@ -8,7 +8,7 @@ const ids = {};
 for (const id of ['menu-view', 'game-view', 'menu-status', 'btn-local',
   'btn-host', 'btn-join', 'btn-connect', 'invite-out', 'invite-in',
   'pad-p1', 'pad-p2', 'viewport', 'net-overlay', 'net-overlay-text',
-  'btn-exit']) {
+  'btn-exit', 'btn-copy', 'btn-paste']) {
   ids[id] = makeEl();
 }
 ids['game-view'].hidden = true;
@@ -20,6 +20,11 @@ global.document = {
   addEventListener() {},
 };
 global.window = {};
+const clipboard = { written: null, toRead: 'PASTED-CODE',
+  async writeText(t) { this.written = t; },
+  async readText() { return this.toRead; } };
+Object.defineProperty(global, 'navigator',
+  { value: { clipboard }, configurable: true });
 
 const mounts = [];
 global.window.TouchPad = {
@@ -101,5 +106,18 @@ assert.match(ids['net-overlay-text'].textContent, /waiting/,
 ids['btn-exit'].handlers.click();
 assert.equal(ids['menu-view'].hidden, false, 'exit returns to menu');
 assert.equal(ids['net-overlay'].hidden, true, 'exit hides overlay');
+
+ids['invite-out'].value = 'CODE-A';
+ids['btn-copy'].handlers.click();
+await sleep(20);
+assert.equal(clipboard.written, 'CODE-A', 'copy writes invite code');
+ids['btn-paste'].handlers.click();
+await sleep(20);
+assert.equal(ids['invite-in'].value, 'PASTED-CODE', 'paste fills the box');
+clipboard.writeText = async () => { throw new Error('denied'); };
+ids['btn-copy'].handlers.click();
+await sleep(20);
+assert.match(ids['menu-status'].textContent, /manually/,
+  'blocked copy falls back to manual');
 
 console.log('flow tests pass');

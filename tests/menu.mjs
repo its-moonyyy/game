@@ -22,7 +22,8 @@ global.document = {
       'invite-in': makeEl(), 'pad-p1': makeEl(),
       'pad-p2': makeEl(), 'viewport': makeEl(),
       'net-overlay': makeEl(), 'net-overlay-text': makeEl(),
-      'btn-exit': makeEl() }[id] || null;
+      'btn-exit': makeEl(), 'btn-copy': makeEl(),
+      'btn-paste': makeEl() }[id] || null;
   },
   addEventListener() {},
 };

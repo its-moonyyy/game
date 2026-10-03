@@ -9,7 +9,7 @@ const ids = {};
 for (const id of ['menu-view', 'game-view', 'menu-status', 'btn-local',
   'btn-host', 'btn-join', 'btn-connect', 'invite-out', 'invite-in',
   'pad-p1', 'pad-p2', 'viewport', 'net-overlay', 'net-overlay-text',
-  'btn-exit']) {
+  'btn-exit', 'btn-copy', 'btn-paste']) {
   ids[id] = makeEl();
 }
 ids['game-view'].hidden = true;
