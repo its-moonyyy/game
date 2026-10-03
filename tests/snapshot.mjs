@@ -77,4 +77,19 @@ assert.ok(landed, 'held jump takes off once');
 const rest = Game.getSnapshot().players[1];
 assert.equal(rest.y, 470 - 40, 'held jump does not bunny-hop');
 
+Game.setLocalPlayer(0);
+const p2x = Game.getSnapshot().players[1].x;
+listeners.keydown({ key: 'ArrowLeft', repeat: false, preventDefault() {} });
+frameFn(t += 16);
+frameFn(t += 16);
+assert.equal(Game.getSnapshot().players[1].x, p2x,
+  'host keyboard ignores guest keys');
+const p1x = Game.getSnapshot().players[0].x;
+listeners.keydown({ key: 'a', repeat: false, preventDefault() {} });
+frameFn(t += 16);
+frameFn(t += 16);
+assert.ok(Game.getSnapshot().players[0].x < p1x, 'host keeps own keys');
+listeners.keyup({ key: 'a' });
+Game.setLocalPlayer(null);
+
 console.log('snapshot tests pass');

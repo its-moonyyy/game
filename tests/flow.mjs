@@ -19,7 +19,8 @@ global.document = {
   getElementById(id) { return ids[id] || null; },
   addEventListener() {},
 };
-global.window = {};
+global.window = { keyHandlers: {},
+  addEventListener(type, fn) { this.keyHandlers[type] = fn; } };
 const clipboard = { written: null, toRead: 'PASTED-CODE',
   async writeText(t) { this.written = t; },
   async readText() { return this.toRead; } };
@@ -37,15 +38,20 @@ const remoteInputs = [];
 global.window.Game = {
   setSimEnabled() {},
   applySnapshot() {},
+  setLocalPlayer() {},
   setRemoteInput(i, input) { remoteInputs.push([i, input]); },
 };
 let joinImpl = async () => { throw new Error('invalid invite code'); };
+const sentInputs = [];
 global.window.Net = {
   async host() {
     return { code: 'CODE-A', connected: new Promise(() => {}) };
   },
   async join(code) { return joinImpl(code); },
   async confirm() {},
+  sendInput(input) { sentInputs.push({ ...input }); },
+  ready() {},
+  onState: null,
   onOpen: null,
   onClose: null,
 };
@@ -119,5 +125,26 @@ ids['btn-copy'].handlers.click();
 await sleep(20);
 assert.match(ids['menu-status'].textContent, /manually/,
   'blocked copy falls back to manual');
+
+joinImpl = async () => ({ code: 'CODE-B' });
+ids['invite-in'].value = 'CODE-A';
+ids['btn-join'].handlers.click();
+ids['btn-connect'].handlers.click();
+await sleep(20);
+global.window.Net.onOpen('guest');
+global.window.keyHandlers.keydown(
+  { key: 'ArrowRight', repeat: false, preventDefault() {} });
+assert.deepEqual(sentInputs.at(-1),
+  { left: false, right: true, jump: false },
+  'guest keyboard sends input');
+global.window.keyHandlers.keyup({ key: 'ArrowRight' });
+assert.deepEqual(sentInputs.at(-1),
+  { left: false, right: false, jump: false },
+  'guest key release sends input');
+global.window.keyHandlers.keydown(
+  { key: 'a', repeat: false, preventDefault() {} });
+assert.deepEqual(sentInputs.at(-1),
+  { left: false, right: false, jump: false },
+  'guest ignores non-guest keys');
 
 console.log('flow tests pass');

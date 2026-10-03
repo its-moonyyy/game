@@ -4,7 +4,10 @@
   const P1_MAP = { left: 'a', right: 'd', jump: 'w' };
   const P2_MAP = { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' };
   const NO_INPUT = { left: false, right: false, jump: false };
+  const GUEST_KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'jump' };
   let role = null;
+  let guestPlay = false;
+  const guestInput = { ...NO_INPUT };
 
   function el(id) {
     return document.getElementById(id);
@@ -38,6 +41,8 @@
 
   function startLocal() {
     role = 'local';
+    guestPlay = false;
+    if (window.Game) window.Game.setLocalPlayer(null);
     show('game');
     mountPad('pad-p1', P1_MAP);
     mountPad('pad-p2', P2_MAP);
@@ -45,6 +50,8 @@
 
   function startHost() {
     role = 'host';
+    guestPlay = false;
+    if (window.Game) window.Game.setLocalPlayer(0);
     if (!window.Net) return;
     setStatus('creating invite code');
     window.Net.host().then((h) => {
@@ -102,11 +109,29 @@
     setStatus('paste manually into the box');
   }
 
+  function sendGuestInput() {
+    if (window.Net) window.Net.sendInput({ ...guestInput });
+  }
+
+  function guestKey(e, down) {
+    if (!guestPlay) return;
+    const action = GUEST_KEYS[e.key];
+    if (!action) return;
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    guestInput[action] = down;
+    sendGuestInput();
+  }
+
   function onOpen(openedRole) {
     el('net-overlay').hidden = true;
     show('game');
     if (openedRole === 'guest') {
-      if (window.Game) window.Game.setSimEnabled(false);
+      guestPlay = true;
+      guestInput.left = guestInput.right = guestInput.jump = false;
+      if (window.Game) {
+        window.Game.setSimEnabled(false);
+        window.Game.setLocalPlayer(-1);
+      }
       if (window.Net) {
         window.Net.onState = (snap) => window.Game.applySnapshot(snap);
         window.Net.ready(true);
@@ -119,7 +144,12 @@
 
   function onClose(closedRole) {
     if (closedRole === 'guest') {
-      if (window.Game) window.Game.setSimEnabled(true);
+      guestPlay = false;
+      guestInput.left = guestInput.right = guestInput.jump = false;
+      if (window.Game) {
+        window.Game.setSimEnabled(true);
+        window.Game.setLocalPlayer(null);
+      }
       show('menu');
       setStatus('host left');
     } else {
@@ -151,8 +181,15 @@
     el('btn-paste').addEventListener('click', pasteInvite);
     el('btn-exit').addEventListener('click', () => {
       el('net-overlay').hidden = true;
+      guestPlay = false;
+      if (window.Game) window.Game.setLocalPlayer(null);
       show('menu');
     });
+    if (typeof window !== 'undefined' &&
+      typeof window.addEventListener === 'function') {
+      window.addEventListener('keydown', (e) => guestKey(e, true));
+      window.addEventListener('keyup', (e) => guestKey(e, false));
+    }
     if (typeof window !== 'undefined' && window.Net) {
       window.Net.onOpen = onOpen;
       window.Net.onClose = onClose;

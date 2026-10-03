@@ -49,15 +49,33 @@ const CFG = [
   { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' },
 ];
 const keys = {};
+let localPlayer = null;   // null = every player reads the keyboard (same screen)
+function keyOwner(key) {
+  for (let i = 0; i < players.length; i++) {
+    const c = players[i].cfg;
+    if (c.left === key || c.right === key || c.jump === key) return i;
+  }
+  return -1;
+}
 window.addEventListener('keydown', (e) => {
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
   if (!e.repeat) {
+    const i = keyOwner(e.key);
+    if (localPlayer !== null && i !== localPlayer) return;   // owned by the remote side
     keys[e.key] = true;
     for (const p of players) if (p.cfg.jump === e.key) p.jumpBuf = 0.15;   // queue a jump
   }
 });
-window.addEventListener('keyup', (e) => { keys[e.key] = false; });
-window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+window.addEventListener('keyup', (e) => {
+  if (localPlayer === null || keyOwner(e.key) === localPlayer) {
+    keys[e.key] = false;
+  }
+});
+window.addEventListener('blur', () => {
+  for (const k in keys) {
+    if (localPlayer === null || keyOwner(k) === localPlayer) keys[k] = false;
+  }
+});
 
 /* =========================================================
    Players
@@ -506,6 +524,11 @@ function setSimEnabled(on) {
   simEnabled = !!on;
 }
 
+function setLocalPlayer(i) {
+  localPlayer = (i === null || i === undefined) ? null : i;
+}
+
 if (typeof window !== 'undefined') {
-  window.Game = { getSnapshot, applySnapshot, setRemoteInput, setSimEnabled };
+  window.Game = { getSnapshot, applySnapshot, setRemoteInput, setSimEnabled,
+    setLocalPlayer };
 }

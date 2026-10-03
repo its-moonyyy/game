@@ -32,6 +32,7 @@ const applied = [];
 global.window.Game = {
   simEnabled: true,
   setSimEnabled(on) { this.simEnabled = on; },
+  setLocalPlayer() {},
   applySnapshot(s) { applied.push(JSON.parse(JSON.stringify(s))); },
 };
 
