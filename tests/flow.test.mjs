@@ -119,7 +119,7 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
     'blocked copy falls back to manual');
 
   const levelBtns = ids['level-row'].children;
-  assert.equal(levelBtns.length, 4, 'four level buttons');
+  assert.equal(levelBtns.length, 5, 'five level buttons');
   levelBtns[1].handlers.click();
   assert.match(ids['menu-status'].textContent, /High Wall/,
     'level select shows title');
