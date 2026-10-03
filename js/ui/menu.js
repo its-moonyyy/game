@@ -171,6 +171,10 @@ function bind() {
     window.addEventListener('keydown', (e) => guestKey(e, true));
     window.addEventListener('keyup', (e) => guestKey(e, false));
   }
+  hookNet();
+}
+
+export function hookNet() {
   if (typeof window !== 'undefined' && window.Net) {
     window.Net.onOpen = onOpen;
     window.Net.onClose = onClose;

@@ -27,3 +27,20 @@ test('menu view toggling, selection, and status', async () => {
   assert.equal(doc.els['menu-status'].textContent, 'waiting',
     'status text set');
 });
+
+test('late Net arrival gets hooked', async () => {
+  const doc = makeDocument(['menu-view', 'game-view', 'menu-status',
+    'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
+    'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
+    'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste']);
+  global.document = doc;
+  global.window = {};
+  const { hookNet } = await import('../js/ui/menu.js');
+  assert.equal(global.window.Net, undefined, 'no Net at menu load');
+  global.window.Net = { onOpen: null, onClose: null };
+  hookNet();
+  assert.equal(typeof global.window.Net.onOpen, 'function',
+    'hookNet wires onOpen after Net arrives');
+  assert.equal(typeof global.window.Net.onClose, 'function',
+    'hookNet wires onClose after Net arrives');
+});

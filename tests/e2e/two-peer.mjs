@@ -27,9 +27,11 @@ test('two-peer host/join flow', async (t) => {
   }
   let msgId = 0;
   const pending = new Map();
+  const sockets = [];
   function connect(url) {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(url);
+      sockets.push(ws);
       ws.onopen = () => resolve(ws);
       ws.onerror = reject;
       ws.onmessage = (e) => {
@@ -108,4 +110,5 @@ test('two-peer host/join flow', async (t) => {
   await sleep(700);
   const after = (await ev(a, `Game.getSnapshot()`)).players[1].x;
   assert.ok(after < before, 'guest input moves host P2');
+  for (const ws of sockets) ws.close();
 });
