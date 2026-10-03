@@ -14,7 +14,7 @@ test('snapshot round-trip, remote input, sim gate, local-player gate', async () 
   global.performance = { now: () => 1000 };
   global.requestAnimationFrame = (fn) => { frameFn = fn; };
 
-  await import('../game.js');
+  await import('../js/main.js');
   const Game = global.window.Game;
   assert.ok(Game, 'window.Game exists');
 

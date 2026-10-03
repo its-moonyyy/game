@@ -46,7 +46,7 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
     onClose: null,
   };
 
-  await import('../menu.js');
+  await import('../js/ui/menu.js');
 
   ids['btn-local'].handlers.click();
   assert.equal(ids['game-view'].hidden, false, 'local shows game view');

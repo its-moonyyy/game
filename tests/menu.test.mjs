@@ -11,7 +11,7 @@ test('menu view toggling, selection, and status', async () => {
   global.window = {};
   doc.els['game-view'].hidden = true;
 
-  await import('../menu.js');
+  await import('../js/ui/menu.js');
 
   assert.ok(global.window.Menu, 'window.Menu exists');
   global.window.Menu.show('game');

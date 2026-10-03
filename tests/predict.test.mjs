@@ -3,7 +3,7 @@ import assert from 'node:assert';
 
 test('prediction math: cadence, extrapolation, reconcile, merge', async () => {
   global.window = {};
-  await import('../net.js');
+  await import('../js/net/peer.js');
   const T = global.window.Net._test;
 
   assert.equal(T.snapshotIntervalMs, 33, 'snapshots run at 33ms');

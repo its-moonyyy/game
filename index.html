@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Script order = dependency DAG: menu, touch, net, then game.
+<!-- Module entry: js/main.js imports the whole dependency DAG.
      See CONTRACTS.md before changing cross-file agreements. -->
 <html lang="en">
 <head>
@@ -36,9 +36,6 @@
       <button id="btn-exit" type="button">Back to menu</button>
     </div>
   </div>
-  <script src="menu.js"></script>
-  <script src="touch.js"></script>
-  <script src="net.js"></script>
-  <script src="game.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -19,10 +19,10 @@ test('touch pad with keyboard parity and multi-touch', async () => {
   global.document = {
     createElement() { return buttons[container.children.length]; },
   };
-  global.keys = {};
-  global.players = [{ cfg: { jump: 'w' }, jumpBuf: 0 }];
 
-  await import('../touch.js');
+  const { keys } = await import('../js/input/keyboard.js');
+  const { World } = await import('../js/world.js');
+  await import('../js/input/touch.js');
   assert.ok(global.window.TouchPad, 'window.TouchPad exists');
 
   const changes = [];
@@ -42,14 +42,14 @@ test('touch pad with keyboard parity and multi-touch', async () => {
   }
 
   fire(buttons[0], 'touchstart', [{ identifier: 1 }]);
-  assert.equal(global.keys.a, true, 'left press sets keys.a');
+  assert.equal(keys.a, true, 'left press sets keys.a');
   assert.deepEqual(changes.at(-1), { left: true, right: false, jump: false });
 
   fire(buttons[1], 'touchstart', [{ identifier: 2 }]);
   fire(buttons[0], 'touchend', [{ identifier: 1 }]);
-  assert.equal(global.keys.a, false, 'left release clears keys.a');
-  assert.equal(global.keys.d, true, 'right finger still held');
+  assert.equal(keys.a, false, 'left release clears keys.a');
+  assert.equal(keys.d, true, 'right finger still held');
 
   fire(buttons[2], 'touchstart', [{ identifier: 3 }]);
-  assert.equal(global.players[0].jumpBuf, 0.15, 'jump buffers like keyboard');
+  assert.equal(World.players[0].jumpBuf, 0.15, 'jump buffers like keyboard');
 });

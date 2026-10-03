@@ -7,7 +7,7 @@ test('invite codes and snapshot queue validation', async () => {
   global.window.Game = { applied: null,
     applySnapshot(s) { this.applied = JSON.parse(JSON.stringify(s)); } };
 
-  await import('../net.js');
+  await import('../js/net/peer.js');
   const Net = global.window.Net;
   assert.ok(Net, 'window.Net exists');
   const T = Net._test;

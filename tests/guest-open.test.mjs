@@ -26,8 +26,8 @@ test('guest open applies queued snapshot as prediction base', async () => {
     applySnapshot(s) { applied.push(JSON.parse(JSON.stringify(s))); },
   };
 
-  await import('../net.js');
-  await import('../menu.js');
+  await import('../js/net/peer.js');
+  await import('../js/ui/menu.js');
 
   const fixture = { v: 1, players: [{ x: 11, y: 22, vx: 0, vy: 0 },
     { x: 33, y: 44, vx: 0, vy: 0 }],
