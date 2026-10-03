@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
-<title>Co-op Capers</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
+  <title>Co-op Capers</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="menu-view">
-<h1>Co-op Capers</h1>
-<p>Play together on one screen or online on two devices.</p>
-<button id="btn-local" type="button">Same screen</button>
-<button id="btn-host" type="button">Host game</button>
-<button id="btn-join" type="button">Join game</button>
-<label for="invite-out">Your invite code</label>
-<textarea id="invite-out" readonly></textarea>
-<button id="btn-copy" type="button">Copy</button>
-<label for="invite-in">Friend invite code</label>
-<textarea id="invite-in"></textarea>
-<button id="btn-paste" type="button">Paste</button>
-<button id="btn-connect" type="button">Connect</button>
-<p id="menu-status"></p>
-<p>Online guest input lags about one round trip behind your fingers. Guest plays with arrow keys or the pad.</p>
-</div>
-<div id="game-view" hidden>
-<canvas id="game" width="960" height="540"></canvas>
-<div id="pad-p1" class="touch-pad"></div>
-<div id="pad-p2" class="touch-pad"></div>
-<div id="net-overlay" hidden>
-<p id="net-overlay-text"></p>
-<button id="btn-exit" type="button">Back to menu</button>
-</div>
-</div>
-<script src="menu.js"></script>
-<script src="touch.js"></script>
-<script src="net.js"></script>
-<script src="game.js"></script>
+  <div id="menu-view">
+    <h1>Co-op Capers</h1>
+    <p>Play together on one screen or online on two devices.</p>
+    <button id="btn-local" type="button">Same screen</button>
+    <button id="btn-host" type="button">Host game</button>
+    <button id="btn-join" type="button">Join game</button>
+    <label for="invite-out">Your invite code</label>
+    <textarea id="invite-out" readonly></textarea>
+    <button id="btn-copy" type="button">Copy</button>
+    <label for="invite-in">Friend invite code</label>
+    <textarea id="invite-in"></textarea>
+    <button id="btn-paste" type="button">Paste</button>
+    <button id="btn-connect" type="button">Connect</button>
+    <p id="menu-status"></p>
+    <p>Online guest input lags about one round trip behind your fingers. Guest plays with arrow keys or the pad.</p>
+  </div>
+  <div id="game-view" hidden>
+    <canvas id="game" width="960" height="540"></canvas>
+    <div id="pad-p1" class="touch-pad"></div>
+    <div id="pad-p2" class="touch-pad"></div>
+    <div id="net-overlay" hidden>
+      <p id="net-overlay-text"></p>
+      <button id="btn-exit" type="button">Back to menu</button>
+    </div>
+  </div>
+  <script src="menu.js"></script>
+  <script src="touch.js"></script>
+  <script src="net.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
