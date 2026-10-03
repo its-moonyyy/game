@@ -1,0 +1,19 @@
+.touch-pad {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .touch-pad {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  .touch-pad button {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.5rem;
+    touch-action: none;
+  }
+}
