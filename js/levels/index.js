@@ -1,11 +1,13 @@
-// Consumes: Level1, Level2, Level3
+// Consumes: Level1, Level2, Level3, Level4
 // Produces: Levels registry (adding a level = one entry here)
 
 import { Level1 } from './level-1.js';
 import { Level2 } from './level-2.js';
 import { Level3 } from './level-3.js';
+import { Level4 } from './level-4.js';
 
-const ALL = { 'level-1': Level1, 'level-2': Level2, 'level-3': Level3 };
+const ALL = { 'level-1': Level1, 'level-2': Level2, 'level-3': Level3,
+  'level-4': Level4 };
 
 export const Levels = {
   current() { return Level1; },

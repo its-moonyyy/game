@@ -157,8 +157,23 @@ function drawPlayer(p) {
   ctx.arc(ex + 10 + p.dir * 1.5, p.y + 17, 2.6, 0, 7); ctx.fill();
 }
 
-function drawParts() {
-  for (const p of World.parts) {
+function drawRope() {
+  const rope = World.level.rope;
+  if (!rope) return;
+  const [a, b] = World.players;
+  const ax = a.x + a.w / 2, ay = a.y + a.h / 2;
+  const bx = b.x + b.w / 2, by = b.y + b.h / 2;
+  const slack = Math.max(0, rope - Math.hypot(bx - ax, by - ay));
+  ctx.strokeStyle = '#6d4519';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.quadraticCurveTo((ax + bx) / 2, (ay + by) / 2 + 8 + slack * 0.15,
+    bx, by);
+  ctx.stroke();
+}
+
+function drawParts() {  for (const p of World.parts) {
     ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
     ctx.fillStyle = p.col;
     ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
@@ -182,6 +197,7 @@ export function renderAll() {
   drawBlock();
   drawGoal();
   for (const p of World.players) drawPlayer(p);
+  drawRope();
   drawParts();
   drawWin();
 }

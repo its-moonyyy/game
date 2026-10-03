@@ -46,6 +46,9 @@ in this file, update this file in the same commit.
 - Pure data files plus one registry entry in `js/levels/index.js`.
   New level = new file + entry; menu buttons render from the
   registry, no menu edit needed.
+- Optional `rope` (px): max center distance between players.
+  `sim/physics.js` reels strays back in; `render/draw.js` draws it.
+  Absent = no constraint.
 
 ## DOM IDs touched by JS
 

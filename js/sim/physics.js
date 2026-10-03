@@ -87,6 +87,9 @@ export function updatePlayers(dt) {
   // ---- player vs player: separate overlap, allow head-standing ----
   separatePlayers(World.players[0], World.players[1]);
 
+  // ---- rope: unbreakable tether, reels in whoever strays too far ----
+  applyRope();
+
   // ---- safety net: nobody may end a frame embedded inside a solid ----
   for (const p of World.players) {
     for (const s of solidList()) {
@@ -117,6 +120,25 @@ export function updatePlayers(dt) {
       p.jumpBuf = 0;
       p.gnd = false; p.onHead = false;
     }
+  }
+}
+
+// Pull both players toward each other when the rope goes taut.
+// Levels without a rope skip this entirely.
+function applyRope() {
+  const rope = World.level.rope;
+  if (!rope) return;
+  const [a, b] = World.players;
+  const ax = a.x + a.w / 2, ay = a.y + a.h / 2;
+  const bx = b.x + b.w / 2, by = b.y + b.h / 2;
+  const dx = bx - ax, dy = by - ay;
+  const d = Math.hypot(dx, dy);
+  if (d <= rope || d === 0) return;
+  const pull = (d - rope) / 2 / d;
+  a.x += dx * pull; a.y += dy * pull;
+  b.x -= dx * pull; b.y -= dy * pull;
+  for (const p of [a, b]) {
+    p.x = Math.max(0, Math.min(W - p.w, p.x));
   }
 }
 
