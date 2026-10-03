@@ -7,6 +7,7 @@ import './net/peer.js';
 import './render/loop.js';
 import { hookNet } from './ui/menu.js';
 import { resetWorld, getSnapshot, applySnapshot } from './world.js';
+import { World } from './world.js';
 import { Levels } from './levels/index.js';
 import { setRemoteInput, setLocalPlayer } from './input/keyboard.js';
 import { setSimEnabled } from './render/loop.js';
@@ -20,9 +21,13 @@ if (typeof window !== 'undefined' && window.location) {
   if (level && Levels.get(level).name === level) resetWorld(level);
 }
 
+function resetRun() {
+  resetWorld(World.level.name);
+}
+
 if (typeof window !== 'undefined') {
   window.Game = {
     getSnapshot, applySnapshot, setRemoteInput, setSimEnabled,
-    setLocalPlayer, resetWorld,
+    setLocalPlayer, resetWorld, resetRun,
   };
 }

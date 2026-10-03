@@ -5,7 +5,8 @@ export function makeEl() {
   const el = { hidden: false, textContent: '', value: '',
     content: '', children: [], handlers: {},
     addEventListener(type, fn) { this.handlers[type] = fn; },
-    appendChild(b) { this.children.push(b); } };
+    appendChild(b) { this.children.push(b); },
+    getContext() { return makeCtx(); } };
   let html = '';
   Object.defineProperty(el, 'innerHTML', {
     get: () => html,
@@ -25,9 +26,12 @@ export function makeDocument(ids) {
 }
 
 export function makeWindow(extra = {}) {
-  return { keyHandlers: {},
-    addEventListener(type, fn) { this.keyHandlers[type] = fn; },
+  const w = { keyHandlers: {},
+    addEventListener(type, fn) {
+      (w.keyHandlers[type] ||= []).push(fn);
+    },
     ...extra };
+  return w;
 }
 
 export function makeCtx() {
@@ -48,7 +52,7 @@ export function b64url(obj) {
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export const ALL_IDS = ['menu-view', 'game-view', 'menu-status',
+export const ALL_IDS = ['game', 'menu-view', 'game-view', 'menu-status',
   'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
   'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
   'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row'];

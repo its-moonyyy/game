@@ -210,6 +210,12 @@ function bind() {
     typeof window.addEventListener === 'function') {
     window.addEventListener('keydown', (e) => guestKey(e, true));
     window.addEventListener('keyup', (e) => guestKey(e, false));
+    window.addEventListener('keydown', (e) => {
+      const k = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+      if (k === 'r' && !el('game-view').hidden && window.Game) {
+        window.Game.resetRun();
+      }
+    });
   }
   hookNet();
 }

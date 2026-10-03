@@ -46,3 +46,54 @@ function collideGoal(p, goal) {
   return p.x < goal.x + goal.w && p.x + p.w > goal.x &&
          p.y < goal.y + goal.h && p.y + p.h > goal.y;
 }
+
+function overlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+export function updateCheckpoints() {
+  for (const c of World.checkpoints) {
+    if (!c.hit && World.players.some((p) => overlap(p, cpZone(c)))) {
+      c.hit = true;
+    }
+  }
+}
+
+function cpZone(c) {
+  return { x: c.x - 20, y: c.y - 20, w: 40, h: 40 };
+}
+
+function lastCheckpoint() {
+  const hit = World.checkpoints.filter((c) => c.hit);
+  return hit.length > 0 ? hit[hit.length - 1] : null;
+}
+
+export function updateFallRespawn() {
+  const floor = (World.level.h || H) + 80;
+  for (const p of World.players) {
+    if (p.y > floor) {
+      const cp = lastCheckpoint();
+      if (cp) {
+        p.x = cp.x; p.y = cp.y - p.h;
+      } else {
+        const spawn = World.level.spawn[World.players.indexOf(p)];
+        p.x = spawn.x; p.y = spawn.y;
+      }
+      p.vx = 0; p.vy = 0;
+      p.ropeHold = 45;   // regrouping grace: the rope won't yank anyone
+    }
+  }
+}
+
+export function updateSummit() {
+  const goal = World.level.goal;
+  if (!World.won && World.players.every((p) => collideGoal(p, goal))) {
+    World.won = true;
+    World.winT = 0;
+  }
+}
+
+export function updateChrono(dt) {
+  if (World.started && !World.won) World.timeMs += dt * 1000;
+}

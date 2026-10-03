@@ -136,17 +136,21 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
   await sleep(20);
   assert.ok(resets.includes('level-2'), 'guest loads host level');
   global.window.Net.onOpen('guest');
-  global.window.keyHandlers.keydown(
-    { key: 'ArrowRight', repeat: false, preventDefault() {} });
+  for (const fn of global.window.keyHandlers.keydown) {
+    fn({ key: 'ArrowRight', repeat: false, preventDefault() {} });
+  }
   assert.deepEqual(sentInputs.at(-1),
     { left: false, right: true, jump: false },
     'guest keyboard sends input');
-  global.window.keyHandlers.keyup({ key: 'ArrowRight' });
+  for (const fn of global.window.keyHandlers.keyup) {
+    fn({ key: 'ArrowRight' });
+  }
   assert.deepEqual(sentInputs.at(-1),
     { left: false, right: false, jump: false },
     'guest key release sends input');
-  global.window.keyHandlers.keydown(
-    { key: 'a', repeat: false, preventDefault() {} });
+  for (const fn of global.window.keyHandlers.keydown) {
+    fn({ key: 'a', repeat: false, preventDefault() {} });
+  }
   assert.deepEqual(sentInputs.at(-1),
     { left: false, right: false, jump: false },
     'guest ignores non-guest keys');

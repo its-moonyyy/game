@@ -3,7 +3,8 @@
 
 import { World } from '../world.js';
 import { updatePlayers, updateBlock } from '../sim/physics.js';
-import { updateSwitches, updateWin } from '../sim/rules.js';
+import { updateSwitches, updateWin, updateCheckpoints, updateFallRespawn,
+  updateSummit, updateChrono } from '../sim/rules.js';
 import { updateParts } from '../sim/particles.js';
 import { renderAll } from './draw.js';
 
@@ -17,9 +18,16 @@ let last = performance.now();
 export function update(dt) {
   for (const p of World.players) p.jumpBuf = Math.max(0, p.jumpBuf - dt);
   updatePlayers(dt);
-  updateBlock(dt);
-  updateSwitches(dt);
-  updateWin(dt);
+  if (World.level.checkpoints) {
+    updateCheckpoints();
+    updateFallRespawn();
+    updateSummit();
+    updateChrono(dt);
+  } else {
+    updateBlock(dt);
+    updateSwitches(dt);
+    updateWin(dt);
+  }
   updateParts(dt);
 }
 

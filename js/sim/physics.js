@@ -108,7 +108,7 @@ export function updatePlayers(dt) {
 
   // shove any player half-in a crate out the nearest side
   for (const p of World.players) {
-    if (!collide(p, World.block)) continue;
+    if (!World.block || !collide(p, World.block)) continue;
     const block = World.block;
     const dx = Math.min(p.x + p.w, block.x + block.w) - Math.max(p.x, block.x);
     const dy = Math.min(p.y + p.h, block.y + block.h) - Math.max(p.y, block.y);
@@ -210,6 +210,7 @@ function separatePlayers(a, b) {
 }
 
 export function updateBlock(dt) {
+  if (!World.block) return;   // crate-less levels (mountain) skip this
   const block = World.block;
   // gravity + vertical resolution (weighs it down into pits too)
   block.vy = Math.min(block.vy + GRAV * dt, 1200);
