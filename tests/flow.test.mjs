@@ -119,22 +119,20 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
     'blocked copy falls back to manual');
 
   const levelBtns = ids['level-row'].children;
-  assert.equal(levelBtns.length, 5, 'five level buttons');
-  levelBtns[1].handlers.click();
-  assert.match(ids['menu-status'].textContent, /High Wall/,
-    'level select shows title');
-  assert.equal(ids['level-row'].children[1].disabled, true,
-    'selected level disabled');
+  assert.equal(levelBtns.length, 1, 'one level button');
+  assert.match(levelBtns[0].textContent, /Montagne/,
+    'mountain button shown');
+  assert.equal(levelBtns[0].disabled, true, 'current level disabled');
   ids['btn-host'].handlers.click();
   await sleep(20);
-  assert.equal(hostLevel, 'level-2', 'host offers selected level');
+  assert.equal(hostLevel, 'mountain-1', 'host offers mountain');
 
-  joinImpl = async () => ({ code: 'CODE-B', level: 'level-2' });
+  joinImpl = async () => ({ code: 'CODE-B', level: 'mountain-1' });
   ids['invite-in'].value = 'CODE-A';
   ids['btn-join'].handlers.click();
   ids['btn-connect'].handlers.click();
   await sleep(20);
-  assert.ok(resets.includes('level-2'), 'guest loads host level');
+  assert.ok(resets.includes('mountain-1'), 'guest loads host level');
   global.window.Net.onOpen('guest');
   for (const fn of global.window.keyHandlers.keydown) {
     fn({ key: 'ArrowRight', repeat: false, preventDefault() {} });

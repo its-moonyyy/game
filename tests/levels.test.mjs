@@ -5,10 +5,9 @@ import { buildWorld } from '../js/world.js';
 
 test('level registry and world factory', () => {
   const names = Levels.list().map((l) => l.name);
-  assert.deepEqual(names, ['level-1', 'level-2', 'level-3', 'level-4',
-    'mountain-1']);
-  const level = Levels.get('level-1');
-  assert.equal(level.name, 'level-1');
+  assert.deepEqual(names, ['mountain-1']);
+  const level = Levels.get('mountain-1');
+  assert.equal(level.name, 'mountain-1');
   assert.ok(level.solid.length > 0, 'has solids');
   assert.ok(level.spawn.length === 2, 'spawns two players');
   assert.deepEqual(Levels.get('nope'), level, 'unknown level falls back');
@@ -17,8 +16,6 @@ test('level registry and world factory', () => {
     const world = buildWorld(Levels.get(name));
     assert.equal(world.players[0].x, world.level.spawn[0].x,
       name + ' players spawn placed');
-    assert.deepEqual(world.switches.map((s) => s.pressed),
-      world.switches.map(() => false), name + ' switches start open');
     const goal = world.level.goal;
     assert.ok(goal.x + goal.w <= 960, name + ' goal fits the world');
   }

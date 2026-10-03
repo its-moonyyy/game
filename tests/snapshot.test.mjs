@@ -17,20 +17,21 @@ test('snapshot round-trip, remote input, sim gate, local-player gate', async () 
   await import('../js/main.js');
   const Game = global.window.Game;
   assert.ok(Game, 'window.Game exists');
+  Game.resetWorld('mountain-1');
 
   const s0 = Game.getSnapshot();
-  assert.equal(s0.players[0].x, 80, 'P1 starts at spawn x');
+  assert.equal(s0.players[0].x, 440, 'P1 starts at spawn x');
   assert.equal(s0.players[0].dir, 1, 'snapshot carries facing');
   assert.equal(s0.v, 2, 'snapshot carries protocol version');
   assert.equal(s0.players[0].grab, false, 'grab reserved');
   assert.equal(s0.players[0].stamina, 0, 'stamina reserved');
-  assert.equal(s0.level, 'level-1', 'snapshot carries level name');
+  assert.equal(s0.level, 'mountain-1', 'snapshot carries level name');
 
   const moved = JSON.parse(JSON.stringify(s0));
-  moved.players[0].x = 100;
+  moved.players[0].x = 460;
   moved.players[0].dir = -1;
   Game.applySnapshot(moved);
-  assert.equal(Game.getSnapshot().players[0].x, 100, 'restores P1 x');
+  assert.equal(Game.getSnapshot().players[0].x, 460, 'restores P1 x');
   assert.equal(Game.getSnapshot().players[0].dir, -1, 'restores facing');
 
   Game.setRemoteInput(1, { left: true, right: false, jump: false });
@@ -41,13 +42,14 @@ test('snapshot round-trip, remote input, sim gate, local-player gate', async () 
   assert.ok(after < before, 'remote left input moves P2 left');
 
   const grounded = Game.getSnapshot();
-  grounded.players[1].y = 470 - 40;
+  grounded.players[1].x = 520;
+  grounded.players[1].y = 4940 - 40;
   grounded.players[1].vy = 0;
   Game.applySnapshot(grounded);
   Game.setRemoteInput(1, { left: false, right: false, jump: true });
   frameFn(1048);
   frameFn(1064);
-  assert.ok(Game.getSnapshot().players[1].y < 470 - 40,
+  assert.ok(Game.getSnapshot().players[1].y < 4940 - 40,
     'remote jump input lifts grounded P2');
 
   Game.setSimEnabled(false);
@@ -59,23 +61,31 @@ test('snapshot round-trip, remote input, sim gate, local-player gate', async () 
   Game.setSimEnabled(true);
 
   const held = Game.getSnapshot();
-  held.players[1].x = 160;
-  held.players[1].y = 470 - 40;
+  held.players[1].x = 520;
+  held.players[1].y = 4940 - 40;
   held.players[1].vy = 0;
   Game.applySnapshot(held);
   Game.setRemoteInput(1, { left: false, right: false, jump: false });
   let t = 2000;
   let landed = false;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 100; i++) {
     Game.setRemoteInput(1, { left: false, right: false, jump: true });
     t += 16;
     frameFn(t);
     const s = Game.getSnapshot().players[1];
-    if (s.y < 470 - 40) landed = true;
+    if (s.y < 4940 - 40) landed = true;
   }
   assert.ok(landed, 'held jump takes off once');
-  const rest = Game.getSnapshot().players[1];
-  assert.equal(rest.y, 470 - 40, 'held jump does not bunny-hop');
+  let highest = 9999;
+  for (let i = 0; i < 100; i++) {
+    Game.setRemoteInput(1, { left: false, right: false, jump: true });
+    t += 16;
+    frameFn(t);
+    const s = Game.getSnapshot().players[1];
+    if (s.y < highest) highest = s.y;
+  }
+  assert.ok(highest >= 4859, 'held jump does not bunny-hop' +
+    ' (rests on ground 4900 or partner head 4860)');
 
   Game.setLocalPlayer(0);
   const p2x = Game.getSnapshot().players[1].x;

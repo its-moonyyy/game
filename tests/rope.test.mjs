@@ -18,13 +18,15 @@ await import('../js/main.js');
 const Game = global.window.Game;
 
 test('rope pulls distant players together on roped levels', async () => {
-  Game.resetWorld('level-4');
+  Game.resetWorld('mountain-1');
 
   const s = Game.getSnapshot();
-  s.players[0].x = 100;
-  s.players[1].x = 400;
+  s.players[0].x = 440;
+  s.players[0].y = 4900;
+  s.players[1].x = 600;
+  s.players[1].y = 4900;
   Game.applySnapshot(s);
-  assert.ok(dist(s.players[0], s.players[1]) > 220, 'setup is taut');
+  assert.ok(dist(s.players[0], s.players[1]) > 140, 'setup is taut');
 
   let t = 3000;
   for (let i = 0; i < 10; i++) {
@@ -32,33 +34,19 @@ test('rope pulls distant players together on roped levels', async () => {
     frameFn(t);
   }
   const after = Game.getSnapshot();
-  assert.ok(dist(after.players[0], after.players[1]) <= 221,
+  assert.ok(dist(after.players[0], after.players[1]) <= 141,
     'rope reels players back in');
-
-  Game.resetWorld('level-1');
-  const s2 = Game.getSnapshot();
-  s2.players[0].x = 100;
-  s2.players[1].x = 500;
-  Game.applySnapshot(s2);
-  for (let i = 0; i < 10; i++) {
-    t += 16;
-    frameFn(t);
-  }
-  const free = Game.getSnapshot();
-  assert.ok(dist(free.players[0], free.players[1]) > 300,
-    'unroped levels leave players alone');
-  Game.resetWorld('level-1');
 });
 
 test('grounded partner anchors instead of being dragged in', async () => {
-  Game.resetWorld('level-4');
+  Game.resetWorld('mountain-1');
   const s = Game.getSnapshot();
-  s.players[0].x = 480;
-  s.players[0].y = 430;
-  s.players[1].x = 200;
-  s.players[1].y = 580;
+  s.players[0].x = 440;
+  s.players[0].y = 4900;
+  s.players[1].x = 100;
+  s.players[1].y = 4950;
   Game.applySnapshot(s);
-  assert.ok(dist(s.players[0], s.players[1]) > 220, 'setup is taut');
+  assert.ok(dist(s.players[0], s.players[1]) > 140, 'setup is taut');
 
   let t = 5000;
   for (let i = 0; i < 30; i++) {
@@ -66,20 +54,20 @@ test('grounded partner anchors instead of being dragged in', async () => {
     frameFn(t);
   }
   const after = Game.getSnapshot();
-  assert.ok(Math.abs(after.players[0].x - 480) < 5,
+  assert.ok(Math.abs(after.players[0].x - 440) < 5,
     'anchored partner holds the edge');
-  assert.equal(after.players[0].y, 430, 'partner never leaves the ledge');
-  Game.resetWorld('level-1');
+  assert.equal(after.players[0].y, 4900, 'partner never leaves the ledge');
 });
 
-test('dangling player climbs the rope by holding jump', async () => {  Game.resetWorld('level-4');
+test('dangling player climbs the rope by holding jump', async () => {
+  Game.resetWorld('mountain-1');
   const s = Game.getSnapshot();
-  s.players[0].x = 480;
-  s.players[0].y = 430;
-  s.players[1].x = 200;
-  s.players[1].y = 580;
+  s.players[0].x = 440;
+  s.players[0].y = 4900;
+  s.players[1].x = 100;
+  s.players[1].y = 4950;
   Game.applySnapshot(s);
-  assert.ok(dist(s.players[0], s.players[1]) > 220, 'climb setup is taut');
+  assert.ok(dist(s.players[0], s.players[1]) > 140, 'climb setup is taut');
   Game.setRemoteInput(1, { left: false, right: false, jump: true });
 
   let t = 7000;
@@ -88,38 +76,34 @@ test('dangling player climbs the rope by holding jump', async () => {  Game.rese
     frameFn(t);
   }
   const after = Game.getSnapshot();
-  assert.ok(after.players[1].y < 520, 'climber rises out of the depths');
-  assert.ok(Math.abs(after.players[0].x - 480) < 10,
+  assert.ok(after.players[1].y < 4900, 'climber rises out of the void');
+  assert.ok(Math.abs(after.players[0].x - 440) < 10,
     'anchor still holds while partner climbs');
   Game.setRemoteInput(1, { left: false, right: false, jump: false });
-  Game.resetWorld('level-1');
 });
 
 test('respawn gives regrouping grace instead of yanking', async () => {
-  Game.resetWorld('level-4');
+  const { updateFallRespawn } = await import('../js/sim/rules.js');
+  Game.resetWorld('mountain-1');
   const s = Game.getSnapshot();
-  s.players[0].x = 480;
-  s.players[0].y = 430;
-  s.players[1].x = 200;
-  s.players[1].y = 580;
+  s.players[0].x = 100;
+  s.players[0].y = 4780;
+  s.players[1].x = 400;
+  s.players[1].y = 5200;
   Game.applySnapshot(s);
+  updateFallRespawn();
+  const respawned = Game.getSnapshot();
+  assert.ok(Math.abs(respawned.players[1].x - 520) < 5,
+    'void fall respawns at spawn');
 
   let t = 9000;
-  for (let i = 0; i < 45; i++) {
-    t += 16;
-    frameFn(t);
-  }
-  const fallen = Game.getSnapshot();
-  assert.ok(Math.abs(fallen.players[1].x - 110) < 5,
-    'faller respawned at spawn');
   for (let i = 0; i < 10; i++) {
     t += 16;
     frameFn(t);
   }
   const after = Game.getSnapshot();
-  assert.ok(Math.abs(after.players[0].x - 480) < 5,
+  assert.ok(Math.abs(after.players[0].x - 100) < 5,
     'partner is not yanked by a respawn');
-  assert.ok(Math.abs(after.players[1].x - 110) < 5,
+  assert.ok(Math.abs(after.players[1].x - 520) < 5,
     'respawned player is not yanked either');
-  Game.resetWorld('level-1');
 });

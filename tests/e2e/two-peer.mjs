@@ -80,6 +80,7 @@ test('two-peer host/join flow', async (t) => {
 
   const a = await newPage();
   const b = await newPage();
+  try {
   await send(a, 'Page.navigate', { url: GAME });
   await send(b, 'Page.navigate', { url: GAME });
   await sleep(1500);
@@ -110,5 +111,25 @@ test('two-peer host/join flow', async (t) => {
   await sleep(700);
   const after = (await ev(a, `Game.getSnapshot()`)).players[1].x;
   assert.ok(after < before, 'guest input moves host P2');
-  for (const ws of sockets) ws.close();
+
+  assert.equal((await ev(a, `Game.getSnapshot()`)).level, 'mountain-1',
+    'mountain boots by default');
+  await ev(b, `Net.sendInput({left:false,right:false,jump:false})`);
+  await sleep(300);
+  const p1start = (await ev(a, `Game.getSnapshot()`)).players[0].x;
+  await ev(a, `window.dispatchEvent(new KeyboardEvent('keydown', {key:'d'}))`);
+  await sleep(500);
+  await ev(a, `window.dispatchEvent(new KeyboardEvent('keyup', {key:'d'}))`);
+  const moved = (await ev(a, `Game.getSnapshot()`)).players[0].x;
+  assert.ok(moved > p1start, 'Bread moves right on the mountain');
+  await ev(a, `(() => { const s = Game.getSnapshot();
+    s.players[0].x = 480; s.players[0].y = 100;
+    s.players[1].x = 500; s.players[1].y = 100;
+    Game.applySnapshot(s); })()`);
+  await sleep(800);
+  assert.equal((await ev(a, `Game.getSnapshot()`)).won, true,
+    'summit wins on mountain');
+  } finally {
+    for (const ws of sockets) ws.close();
+  }
 });
