@@ -493,7 +493,8 @@ requestAnimationFrame(frame);
    ========================================================= */
 function getSnapshot() {
   return {
-    players: players.map((p) => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy })),
+    players: players.map((p) => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+      dir: p.dir })),
     block: { x: block.x, y: block.y, vy: block.vy },
     openAmt,
     switches: SWITCHES.map((s) => s.pressed),
@@ -505,6 +506,7 @@ function applySnapshot(s) {
   s.players.forEach((sp, i) => {
     players[i].x = sp.x; players[i].y = sp.y;
     players[i].vx = sp.vx; players[i].vy = sp.vy;
+    if (typeof sp.dir === 'number') players[i].dir = sp.dir;
   });
   block.x = s.block.x; block.y = s.block.y; block.vy = s.block.vy;
   openAmt = s.openAmt;

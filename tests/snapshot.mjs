@@ -27,11 +27,14 @@ assert.ok(Game, 'window.Game exists');
 
 const s0 = Game.getSnapshot();
 assert.equal(s0.players[0].x, 80, 'P1 starts at spawn x');
+assert.equal(s0.players[0].dir, 1, 'snapshot carries facing');
 
 const moved = JSON.parse(JSON.stringify(s0));
 moved.players[0].x = 100;
+moved.players[0].dir = -1;
 Game.applySnapshot(moved);
 assert.equal(Game.getSnapshot().players[0].x, 100, 'snapshot restores P1 x');
+assert.equal(Game.getSnapshot().players[0].dir, -1, 'snapshot restores facing');
 
 Game.setRemoteInput(1, { left: true, right: false, jump: false });
 const before = Game.getSnapshot().players[1].x;

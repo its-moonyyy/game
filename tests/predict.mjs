@@ -28,8 +28,10 @@ const server = JSON.parse(JSON.stringify(snap));
 server.players[1].x = 44;
 server.players[0].x = 80;
 server.players[0].vx = 0;
+server.players[0].dir = -1;
 const m = T.mergePrediction(local, server, 33);
 assert.equal(m.players[0].x, 80, 'P1 follows server');
+assert.equal(m.players[0].dir, -1, 'P1 facing follows server');
 assert.ok(Math.abs(m.players[1].x - 50) < 6, 'P2 keeps local prediction');
 assert.deepEqual(m.switches, server.switches, 'switches follow server');
 
