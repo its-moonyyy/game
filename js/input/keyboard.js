@@ -47,6 +47,7 @@ export function setRemoteInput(i, input) {
   const p = World.players[i];
   keys[p.cfg.left] = !!input.left;
   keys[p.cfg.right] = !!input.right;
+  keys[p.cfg.jump] = !!input.jump;   // held state (rope climb reads it)
   if (input.jump && !p.remoteJumpHeld) p.jumpBuf = 0.15;  // rising edge only
   p.remoteJumpHeld = !!input.jump;
 }

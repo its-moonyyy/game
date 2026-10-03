@@ -37,6 +37,7 @@ export function updateWin(dt) {
       const spawn = World.level.spawn[World.players.indexOf(p)];
       p.x = spawn.x; p.y = spawn.y;
       p.vx = 0; p.vy = 0;
+      p.ropeHold = 45;   // regrouping grace: the rope won't yank anyone
     }
   }
 }

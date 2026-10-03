@@ -12,7 +12,7 @@ export function buildWorld(level) {
     players: CFG.map((cfg, i) => ({
       cfg, x: level.spawn[i].x, y: level.spawn[i].y, w: PW, h: PH,
       vx: 0, vy: 0, gnd: false, onHead: false,
-      dir: 1, jumpBuf: 0,
+      dir: 1, jumpBuf: 0, ropeHold: 0,
     })),
     block: { x: level.blockStart.x, y: level.blockStart.y,
       w: BW, h: BW, vy: 0 },

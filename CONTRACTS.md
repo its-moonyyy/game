@@ -47,8 +47,12 @@ in this file, update this file in the same commit.
   New level = new file + entry; menu buttons render from the
   registry, no menu edit needed.
 - Optional `rope` (px): max center distance between players.
-  `sim/physics.js` reels strays back in; `render/draw.js` draws it.
-  Absent = no constraint.
+  `sim/physics.js` enforces it: a grounded player anchors (never
+  dragged), the airborne side yields; whoever moved most yields most
+  on equal footing; respawn grants 45 frames of grace with no pull.
+  A dangling player holding jump hauls toward an anchored partner
+  (240 px/s) and swings onto their shoulders within 64 px, ready
+  for a boosted jump. `render/draw.js` draws the rope.
 
 ## DOM IDs touched by JS
 

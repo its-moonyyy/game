@@ -48,7 +48,11 @@ function tryPushBlock(dx) {
 }
 
 export function updatePlayers(dt) {
+  const [pa, pb] = World.players;
+  const prevA = { x: pa.x, y: pa.y };
+  const prevB = { x: pb.x, y: pb.y };
   for (const p of World.players) {
+    p.ropeHold = Math.max(0, (p.ropeHold || 0) - 1);
     // ---- horizontal movement + X collision ----
     let dir = 0;
     if (keys[p.cfg.left])  dir -= 1;
@@ -88,7 +92,7 @@ export function updatePlayers(dt) {
   separatePlayers(World.players[0], World.players[1]);
 
   // ---- rope: unbreakable tether, reels in whoever strays too far ----
-  applyRope();
+  applyRope(dt, prevA, prevB);
 
   // ---- safety net: nobody may end a frame embedded inside a solid ----
   for (const p of World.players) {
@@ -124,8 +128,10 @@ export function updatePlayers(dt) {
 }
 
 // Pull both players toward each other when the rope goes taut.
+// A grounded player anchors: only the dangling side moves.
 // Levels without a rope skip this entirely.
-function applyRope() {
+const ROPE_CLIMB = 240;   // px/s hauled while holding jump
+function applyRope(dt, prevA, prevB) {
   const rope = World.level.rope;
   if (!rope) return;
   const [a, b] = World.players;
@@ -133,10 +139,49 @@ function applyRope() {
   const bx = b.x + b.w / 2, by = b.y + b.h / 2;
   const dx = bx - ax, dy = by - ay;
   const d = Math.hypot(dx, dy);
+  // Rope climb runs even on a slack rope: a dangling player holding
+  // jump hauls toward an anchored partner instead of dragging them in.
+  // Close enough and they swing up onto the partner's shoulders, ready
+  // for a boosted jump to safety.
+  for (const [self, partner] of [[a, b], [b, a]]) {
+    const selfAnchor = self.gnd || self.onHead;
+    const partnerAnchor = partner.gnd || partner.onHead;
+    if (selfAnchor || !partnerAnchor || !keys[self.cfg.jump]) continue;
+    const sx = self.x + self.w / 2, sy = self.y + self.h / 2;
+    const px = partner.x + partner.w / 2, py = partner.y + partner.h / 2;
+    const dd = Math.hypot(px - sx, py - sy);
+    if (dd <= 64 && partner.y >= self.y - 8) {
+      self.x = partner.x + (partner.w - self.w) / 2;
+      self.y = partner.y - self.h;
+      self.vy = Math.min(self.vy, 0);
+      self.onHead = true;
+      continue;
+    }
+    if (dd > 64) {
+      const step = Math.min(ROPE_CLIMB * dt, dd - 64);
+      self.x += (px - sx) / dd * step;
+      self.y += (py - sy) / dd * step;
+      self.vy = Math.min(self.vy, 60);
+    }
+  }
   if (d <= rope || d === 0) return;
-  const pull = (d - rope) / 2 / d;
-  a.x += dx * pull; a.y += dy * pull;
-  b.x -= dx * pull; b.y -= dy * pull;
+  const aAnchor = a.gnd || a.onHead;
+  const bAnchor = b.gnd || b.onHead;
+  let aShare = 0.5, bShare = 0.5;
+  if (aAnchor && !bAnchor) { aShare = 0; bShare = 1; }
+  else if (bAnchor && !aAnchor) { aShare = 1; bShare = 0; }
+  else if (a.ropeHold > 0 || b.ropeHold > 0) {
+    return;   // respawn grace: nobody gets yanked while regrouping
+  } else {
+    // Both on equal footing: whoever moved most yields most. The
+    // partner standing still is never dragged.
+    const da = Math.hypot(a.x - prevA.x, a.y - prevA.y);
+    const db = Math.hypot(b.x - prevB.x, b.y - prevB.y);
+    if (da + db > 0) { aShare = da / (da + db); bShare = db / (da + db); }
+  }
+  const pull = (d - rope) / d;
+  a.x += dx * pull * aShare; a.y += dy * pull * aShare;
+  b.x -= dx * pull * bShare; b.y -= dy * pull * bShare;
   for (const p of [a, b]) {
     p.x = Math.max(0, Math.min(W - p.w, p.x));
   }
