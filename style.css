@@ -1,0 +1,14 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #1c2430;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game {
+  width: min(96vw, calc(96vh * 1.7777));
+  display: block;
+}

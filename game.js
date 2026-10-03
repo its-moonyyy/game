@@ -1,18 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Co-op Capers</title>
-<style>
-  html, body { margin: 0; height: 100%; background: #1c2430; overflow: hidden;
-               display: flex; align-items: center; justify-content: center; }
-  #game { width: min(96vw, calc(96vh * 1.7777)); display: block; }
-</style>
-</head>
-<body>
-<canvas id="game" width="960" height="540"></canvas>
-<script>
 'use strict';
 
 /* =========================================================
@@ -483,6 +468,3 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-</script>
-</body>
-</html>
