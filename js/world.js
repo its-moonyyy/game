@@ -1,6 +1,6 @@
 // Consumes: Config (sizes, CFG), Levels (static geometry)
 // Produces: buildWorld(level), World (live singleton), resetWorld,
-//   getSnapshot, applySnapshot (snapshot protocol v1, see CONTRACTS.md)
+//   getSnapshot, applySnapshot (snapshot protocol v2, see CONTRACTS.md)
 
 import { PW, PH, BW } from './config.js';
 import { CFG } from './config.js';
@@ -12,7 +12,7 @@ export function buildWorld(level) {
     players: CFG.map((cfg, i) => ({
       cfg, x: level.spawn[i].x, y: level.spawn[i].y, w: PW, h: PH,
       vx: 0, vy: 0, gnd: false, onHead: false,
-      dir: 1, jumpBuf: 0, ropeHold: 0,
+      dir: 1, jumpBuf: 0, ropeHold: 0, grab: false, stamina: 0,
     })),
     block: level.blockStart
       ? { x: level.blockStart.x, y: level.blockStart.y, w: BW, h: BW, vy: 0 }
@@ -39,10 +39,10 @@ export function resetWorld(name) {
 
 export function getSnapshot() {
   return {
-    v: 1,
+    v: 2,
     level: World.level.name,
     players: World.players.map((p) => ({ x: p.x, y: p.y, vx: p.vx,
-      vy: p.vy, dir: p.dir })),
+      vy: p.vy, dir: p.dir, grab: p.grab, stamina: p.stamina })),
     block: World.block
       ? { x: World.block.x, y: World.block.y, vy: World.block.vy }
       : null,
@@ -59,6 +59,8 @@ export function applySnapshot(s) {  s.players.forEach((sp, i) => {
     World.players[i].x = sp.x; World.players[i].y = sp.y;
     World.players[i].vx = sp.vx; World.players[i].vy = sp.vy;
     if (typeof sp.dir === 'number') World.players[i].dir = sp.dir;
+    if (typeof sp.grab === 'boolean') World.players[i].grab = sp.grab;
+    if (typeof sp.stamina === 'number') World.players[i].stamina = sp.stamina;
   });
   if (s.block && World.block) {
     World.block.x = s.block.x;

@@ -6,11 +6,13 @@ in this file, update this file in the same commit.
 
 ## Snapshot protocol (host -> guest, JSON, ~200 bytes, 30 Hz)
 
-- `v`: number, currently `1`. Guests reject any other version.
-- `players`: exactly 2 x `{x, y, vx, vy, dir}` (numbers; `dir` is -1/1).
-- `block`: `{x, y, vy}` (numbers).
+- `v`: number, currently `2`. Guests reject any other version
+  (a stale v1 guest freezes: it drops every state).
+- `players`: exactly 2 x `{x, y, vx, vy, dir, grab, stamina}`
+  (`grab` boolean and `stamina` number reserved at zero for now).
+- `block`: `{x, y, vy}` or `null` on block-less levels.
 - `openAmt`: number 0..1. `switches`: exactly 2 booleans.
-- `won`: boolean.
+- `won`: boolean. `level`: level name (informational).
 
 ## Channel messages (JSON, `{type, ...}`)
 

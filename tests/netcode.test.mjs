@@ -29,8 +29,9 @@ test('invite codes and snapshot queue validation', async () => {
     () => T.decodeInvite(b64url({ type: 'answer', sdp: 'y', id: 'q' }), 'offer'),
     /type/, 'wrong-type code rejected');
 
-  const fixture = { v: 1, players: [{ x: 1, y: 2, vx: 3, vy: 4 },
-    { x: 5, y: 6, vx: 7, vy: 8 }],
+  const fixture = { v: 2,
+    players: [{ x: 1, y: 2, vx: 3, vy: 4, grab: false, stamina: 0 },
+      { x: 5, y: 6, vx: 7, vy: 8, grab: false, stamina: 0 }],
     block: { x: 9, y: 10, vy: 11 }, openAmt: 0.5,
     switches: [true, false], won: false };
 
@@ -64,4 +65,14 @@ test('invite codes and snapshot queue validation', async () => {
   T.injectState(unversioned);
   T.setReady(true);
   assert.equal(seen.length, 1, 'unversioned snapshot never delivered');
+  T.setReady(false);
+  T.injectState({ ...fixture, v: 1 });
+  T.setReady(true);
+  assert.equal(seen.length, 1, 'v1 snapshot rejected by v2 guest');
+  T.setReady(false);
+  const noGrab = JSON.parse(JSON.stringify(fixture));
+  delete noGrab.players[0].grab;
+  T.injectState(noGrab);
+  T.setReady(true);
+  assert.equal(seen.length, 1, 'snapshot without grab rejected');
 });

@@ -8,12 +8,15 @@ const guest = { ready: false, queued: null, latest: null, active: false };
 let lastLocal = { left: false, right: false, jump: false };
 
 function validSnapshot(s) {
-  if (!s || s.v !== 1) return false;
+  if (!s || s.v !== 2) return false;
   if (!Array.isArray(s.players) || s.players.length !== 2) {
     return false;
   }
   for (const p of s.players) {
     if (!['x', 'y', 'vx', 'vy'].every((k) => typeof p[k] === 'number')) {
+      return false;
+    }
+    if (typeof p.grab !== 'boolean' || typeof p.stamina !== 'number') {
       return false;
     }
   }
