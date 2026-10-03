@@ -7,10 +7,13 @@ function makeEl() {
 const ids = {};
 for (const id of ['menu-view', 'game-view', 'menu-status', 'btn-local',
   'btn-host', 'btn-join', 'btn-connect', 'invite-out', 'invite-in',
-  'pad-p1', 'pad-p2']) {
+  'pad-p1', 'pad-p2', 'viewport', 'net-overlay', 'net-overlay-text',
+  'btn-exit']) {
   ids[id] = makeEl();
 }
 ids['game-view'].hidden = true;
+ids['net-overlay'].hidden = true;
+ids['viewport'].content = 'width=device-width, initial-scale=1';
 
 global.document = {
   getElementById(id) { return ids[id] || null; },
@@ -79,5 +82,24 @@ await sleep(20);
 assert.match(ids['menu-status'].textContent, /invalid/,
   'bad code shows inline error');
 assert.equal(ids['menu-view'].hidden, false, 'bad code stays on menu');
+
+global.window.Menu.show('game');
+assert.match(ids['viewport'].content, /maximum-scale=1/,
+  'game view locks viewport zoom');
+global.window.Menu.show('menu');
+assert.ok(!/maximum-scale/.test(ids['viewport'].content),
+  'menu view restores viewport zoom');
+
+ids['btn-host'].handlers.click();
+await sleep(20);
+global.window.Net.onOpen('host');
+global.window.Net.onClose('host');
+assert.equal(ids['net-overlay'].hidden, false,
+  'guest drop shows host overlay');
+assert.match(ids['net-overlay-text'].textContent, /waiting/,
+  'overlay says waiting');
+ids['btn-exit'].handlers.click();
+assert.equal(ids['menu-view'].hidden, false, 'exit returns to menu');
+assert.equal(ids['net-overlay'].hidden, true, 'exit hides overlay');
 
 console.log('flow tests pass');

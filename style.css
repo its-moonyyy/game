@@ -13,6 +13,17 @@ html, body {
   display: block;
 }
 
+#game-view {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+#net-overlay {
+  color: #eaf2f8;
+  font-family: sans-serif;
+  text-align: center;
+}
+
 #menu-view {
   color: #eaf2f8;
   font-family: sans-serif;

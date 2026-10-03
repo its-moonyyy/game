@@ -58,4 +58,23 @@ assert.equal(Game.getSnapshot().players[0].x, frozen,
   'disabled sim freezes positions');
 Game.setSimEnabled(true);
 
+const held = Game.getSnapshot();
+held.players[1].x = 160;
+held.players[1].y = 470 - 40;
+held.players[1].vy = 0;
+Game.applySnapshot(held);
+Game.setRemoteInput(1, { left: false, right: false, jump: false });
+let t = 2000;
+let landed = false;
+for (let i = 0; i < 200; i++) {
+  Game.setRemoteInput(1, { left: false, right: false, jump: true });
+  t += 16;
+  frameFn(t);
+  const s = Game.getSnapshot().players[1];
+  if (s.y < 470 - 40) landed = true;
+}
+assert.ok(landed, 'held jump takes off once');
+const rest = Game.getSnapshot().players[1];
+assert.equal(rest.y, 470 - 40, 'held jump does not bunny-hop');
+
 console.log('snapshot tests pass');

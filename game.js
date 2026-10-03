@@ -498,7 +498,8 @@ function setRemoteInput(i, input) {
   const p = players[i];
   keys[p.cfg.left] = !!input.left;
   keys[p.cfg.right] = !!input.right;
-  if (input.jump) p.jumpBuf = 0.15;
+  if (input.jump && !p.remoteJumpHeld) p.jumpBuf = 0.15;  // rising edge only
+  p.remoteJumpHeld = !!input.jump;
 }
 
 function setSimEnabled(on) {

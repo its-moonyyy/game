@@ -10,9 +10,14 @@
     return document.getElementById(id);
   }
 
+  const VIEWPORT_FULL = 'width=device-width, initial-scale=1';
+  const VIEWPORT_LOCKED = 'width=device-width, initial-scale=1,' +
+    ' maximum-scale=1, user-scalable=no';
+
   function show(view) {
     el('menu-view').hidden = view !== 'menu';
     el('game-view').hidden = view !== 'game';
+    el('viewport').content = view === 'game' ? VIEWPORT_LOCKED : VIEWPORT_FULL;
   }
 
   function setStatus(text) {
@@ -69,12 +74,13 @@
   }
 
   function onOpen(openedRole) {
+    el('net-overlay').hidden = true;
     show('game');
     if (openedRole === 'guest') {
       if (window.Game) window.Game.setSimEnabled(false);
       if (window.Net) {
-        window.Net.ready(true);
         window.Net.onState = (snap) => window.Game.applySnapshot(snap);
+        window.Net.ready(true);
       }
       mountPad('pad-p1', P2_MAP, (input) => window.Net.sendInput(input));
     } else {
@@ -87,8 +93,10 @@
       if (window.Game) window.Game.setSimEnabled(true);
       show('menu');
       setStatus('host left');
-    } else if (window.Game) {
-      window.Game.setRemoteInput(1, NO_INPUT);
+    } else {
+      if (window.Game) window.Game.setRemoteInput(1, NO_INPUT);
+      el('net-overlay-text').textContent = 'guest disconnected, waiting';
+      el('net-overlay').hidden = false;
     }
   }
 
@@ -110,6 +118,10 @@
     el('btn-host').addEventListener('click', () => select('host'));
     el('btn-join').addEventListener('click', () => select('join'));
     el('btn-connect').addEventListener('click', connectPressed);
+    el('btn-exit').addEventListener('click', () => {
+      el('net-overlay').hidden = true;
+      show('menu');
+    });
     if (typeof window !== 'undefined' && window.Net) {
       window.Net.onOpen = onOpen;
       window.Net.onClose = onClose;

@@ -20,7 +20,9 @@ global.document = {
       'btn-host': hostBtn, 'btn-join': joinBtn,
       'btn-connect': makeEl(), 'invite-out': makeEl(),
       'invite-in': makeEl(), 'pad-p1': makeEl(),
-      'pad-p2': makeEl() }[id] || null;
+      'pad-p2': makeEl(), 'viewport': makeEl(),
+      'net-overlay': makeEl(), 'net-overlay-text': makeEl(),
+      'btn-exit': makeEl() }[id] || null;
   },
   addEventListener() {},
 };

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
 <title>Co-op Capers</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -25,6 +25,10 @@
 <canvas id="game" width="960" height="540"></canvas>
 <div id="pad-p1" class="touch-pad"></div>
 <div id="pad-p2" class="touch-pad"></div>
+<div id="net-overlay" hidden>
+<p id="net-overlay-text"></p>
+<button id="btn-exit" type="button">Back to menu</button>
+</div>
 </div>
 <script src="menu.js"></script>
 <script src="touch.js"></script>

@@ -48,4 +48,15 @@ assert.deepEqual(global.window.Game.applied, null,
 T.injectState({ nope: true });
 assert.equal(seen.length, 1, 'malformed snapshot ignored');
 
+T.setReady(false);
+const missingSwitches = { ...fixture };
+delete missingSwitches.switches;
+T.injectState(missingSwitches);
+T.setReady(true);
+assert.equal(seen.length, 1, 'snapshot without switches never delivered');
+T.setReady(false);
+T.injectState({ ...fixture, won: 'yes' });
+T.setReady(true);
+assert.equal(seen.length, 1, 'snapshot with bad won flag never delivered');
+
 console.log('netcode tests pass');

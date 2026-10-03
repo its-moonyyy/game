@@ -51,8 +51,16 @@
         return false;
       }
     }
-    return !!s.block && ['x', 'y', 'vy']
-      .every((k) => typeof s.block[k] === 'number');
+    if (!s.block || !['x', 'y', 'vy']
+      .every((k) => typeof s.block[k] === 'number')) {
+      return false;
+    }
+    if (typeof s.openAmt !== 'number') return false;
+    if (!Array.isArray(s.switches) || s.switches.length !== 2 ||
+      !s.switches.every((v) => typeof v === 'boolean')) {
+      return false;
+    }
+    return typeof s.won === 'boolean';
   }
 
   const guest = { ready: false, queued: null, prev: null, next: null,
