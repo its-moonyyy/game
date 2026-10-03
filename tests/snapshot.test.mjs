@@ -22,6 +22,7 @@ test('snapshot round-trip, remote input, sim gate, local-player gate', async () 
   assert.equal(s0.players[0].x, 80, 'P1 starts at spawn x');
   assert.equal(s0.players[0].dir, 1, 'snapshot carries facing');
   assert.equal(s0.v, 1, 'snapshot carries protocol version');
+  assert.equal(s0.level, 'level-1', 'snapshot carries level name');
 
   const moved = JSON.parse(JSON.stringify(s0));
   moved.players[0].x = 100;

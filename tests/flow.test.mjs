@@ -29,12 +29,16 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
     setSimEnabled() {},
     applySnapshot() {},
     setLocalPlayer() {},
+    resetWorld(name) { resets.push(name); },
     setRemoteInput(i, input) { remoteInputs.push([i, input]); },
   };
   let joinImpl = async () => { throw new Error('invalid invite code'); };
   const sentInputs = [];
+  const resets = [];
+  let hostLevel = null;
   global.window.Net = {
-    async host() {
+    async host(level) {
+      hostLevel = level;
       return { code: 'CODE-A', connected: new Promise(() => {}) };
     },
     async join(code) { return joinImpl(code); },
@@ -114,11 +118,23 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
   assert.match(ids['menu-status'].textContent, /manually/,
     'blocked copy falls back to manual');
 
-  joinImpl = async () => ({ code: 'CODE-B' });
+  const levelBtns = ids['level-row'].children;
+  assert.equal(levelBtns.length, 3, 'three level buttons');
+  levelBtns[1].handlers.click();
+  assert.match(ids['menu-status'].textContent, /High Wall/,
+    'level select shows title');
+  assert.equal(ids['level-row'].children[1].disabled, true,
+    'selected level disabled');
+  ids['btn-host'].handlers.click();
+  await sleep(20);
+  assert.equal(hostLevel, 'level-2', 'host offers selected level');
+
+  joinImpl = async () => ({ code: 'CODE-B', level: 'level-2' });
   ids['invite-in'].value = 'CODE-A';
   ids['btn-join'].handlers.click();
   ids['btn-connect'].handlers.click();
   await sleep(20);
+  assert.ok(resets.includes('level-2'), 'guest loads host level');
   global.window.Net.onOpen('guest');
   global.window.keyHandlers.keydown(
     { key: 'ArrowRight', repeat: false, preventDefault() {} });

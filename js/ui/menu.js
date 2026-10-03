@@ -3,6 +3,7 @@
 // Produces: window.Menu (show/setStatus/onSelect), mode flows
 
 import { Clipboard } from './clipboard.js';
+import { Levels } from '../levels/index.js';
 
 const P1_MAP = { left: 'a', right: 'd', jump: 'w' };
 const P2_MAP = { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' };
@@ -11,6 +12,7 @@ const GUEST_KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'jump' };
 let role = null;
 let guestPlay = false;
 const guestInput = { ...NO_INPUT };
+let selectedLevel = 'level-1';
 
 function el(id) {
   return document.getElementById(id);
@@ -42,10 +44,37 @@ function mountPad(id, mapping, onChange) {
   }
 }
 
+function selectedLevelFromUrl() {
+  if (typeof window === 'undefined' || !window.location) return 'level-1';
+  const name = new URLSearchParams(window.location.search).get('level');
+  return Levels.get(name).name;
+}
+
+function renderLevels() {
+  const row = el('level-row');
+  row.innerHTML = '';
+  for (const { name, title } of Levels.list()) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = title;
+    btn.disabled = name === selectedLevel;
+    btn.addEventListener('click', () => {
+      selectedLevel = name;
+      if (window.Game) window.Game.resetWorld(name);
+      setStatus(title + ' selected');
+      renderLevels();
+    });
+    row.appendChild(btn);
+  }
+}
+
 function startLocal() {
   role = 'local';
   guestPlay = false;
-  if (window.Game) window.Game.setLocalPlayer(null);
+  if (window.Game) {
+    window.Game.resetWorld(selectedLevel);
+    window.Game.setLocalPlayer(null);
+  }
   show('game');
   mountPad('pad-p1', P1_MAP);
   mountPad('pad-p2', P2_MAP);
@@ -54,10 +83,13 @@ function startLocal() {
 function startHost() {
   role = 'host';
   guestPlay = false;
-  if (window.Game) window.Game.setLocalPlayer(0);
+  if (window.Game) {
+    window.Game.resetWorld(selectedLevel);
+    window.Game.setLocalPlayer(0);
+  }
   if (!window.Net) return;
   setStatus('creating invite code');
-  window.Net.host().then((h) => {
+  window.Net.host(selectedLevel).then((h) => {
     el('invite-out').value = h.code;
     setStatus('waiting for guest');
     h.connected.catch(fail);
@@ -79,6 +111,10 @@ function connectPressed() {
   if (!window.Net) return;
   window.Net.join(code).then((j) => {
     el('invite-out').value = j.code;
+    if (j.level && window.Game) {
+      selectedLevel = j.level;
+      window.Game.resetWorld(j.level);
+    }
     setStatus('connecting, share your code back');
   }).catch(fail);
 }
@@ -154,6 +190,9 @@ function select(mode) {
 }
 
 function bind() {
+  selectedLevel = selectedLevelFromUrl();
+  if (window.Game) window.Game.resetWorld(selectedLevel);
+  renderLevels();
   el('btn-local').addEventListener('click', () => select('local'));
   el('btn-host').addEventListener('click', () => select('host'));
   el('btn-join').addEventListener('click', () => select('join'));

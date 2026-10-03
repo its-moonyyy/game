@@ -19,8 +19,9 @@ in this file, update this file in the same commit.
   malformed frames are ignored, never crash the loop.
 - Host -> guest: `{type: 'state', snap}` at 33 ms.
 - Invite codes: base64url JSON `{type: 'offer'|'answer', sdp, id}`
-  starting with `eyJ`. Own codes (matching a locally created `id`)
-  are rejected, as is the wrong `type` for the slot.
+  starting with `eyJ`. Offers also carry `level` (the host's pick);
+  the guest loads it on join. Own codes (matching a locally created
+  `id`) are rejected, as is the wrong `type` for the slot.
 
 ## Input slots
 
@@ -34,9 +35,17 @@ in this file, update this file in the same commit.
 ## window.Game facade (owned by render/loop.js, the only public seam)
 
 - `getSnapshot()` / `applySnapshot(s)` — `applySnapshot` skips
-  `dir` when absent and never touches input state.
+  `dir` when absent and never touches input state. Snapshots carry
+  `level` (informational; authority stays with the invite).
 - `setRemoteInput(i, input)`, `setSimEnabled(bool)`,
-  `setLocalPlayer(i|null|-1)`.
+  `setLocalPlayer(i|null|-1)`, `resetWorld(name)` (unknown names
+  fall back to level-1).
+
+## Levels (`js/levels/`)
+
+- Pure data files plus one registry entry in `js/levels/index.js`.
+  New level = new file + entry; menu buttons render from the
+  registry, no menu edit needed.
 
 ## DOM IDs touched by JS
 

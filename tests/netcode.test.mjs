@@ -19,6 +19,10 @@ test('invite codes and snapshot queue validation', async () => {
 
   const foreign = b64url({ type: 'offer', sdp: 'y', id: 'zzz' });
   assert.equal(T.decodeInvite(foreign).sdp, 'y', 'foreign code decodes');
+  const leveled = b64url({ type: 'offer', sdp: 'y', id: 'lvl',
+    level: 'level-2' });
+  assert.equal(T.decodeInvite(leveled, 'offer').level, 'level-2',
+    'invite carries the level');
   assert.throws(() => T.decodeInvite('!!!'), /invalid/,
     'garbage code rejected');
   assert.throws(

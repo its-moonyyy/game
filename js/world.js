@@ -36,6 +36,7 @@ export function resetWorld(name) {
 export function getSnapshot() {
   return {
     v: 1,
+    level: World.level.name,
     players: World.players.map((p) => ({ x: p.x, y: p.y, vx: p.vx,
       vy: p.vy, dir: p.dir })),
     block: { x: World.block.x, y: World.block.y, vy: World.block.vy },

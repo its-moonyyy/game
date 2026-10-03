@@ -6,6 +6,7 @@
 // gate and into the goal.
 export const Level1 = {
   name: 'level-1',
+  title: 'First Steps',
   // Static solid rectangles. The pit (x 250..390) has no solid.
   solid: [
     { x: 0, y: 470, w: 250, h: 70 },    // start ledge

@@ -19,6 +19,22 @@
   margin: 0.25rem 0 0.75rem;
 }
 
+#level-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+#level-row button {
+  display: inline-block;
+  margin: 0;
+}
+
+#level-row button:disabled {
+  opacity: 0.55;
+}
+
 #net-overlay {
   color: #eaf2f8;
   font-family: sans-serif;

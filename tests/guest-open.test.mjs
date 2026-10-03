@@ -23,6 +23,7 @@ test('guest open applies queued snapshot as prediction base', async () => {
     simEnabled: true,
     setSimEnabled(on) { this.simEnabled = on; },
     setLocalPlayer() {},
+    resetWorld() {},
     applySnapshot(s) { applied.push(JSON.parse(JSON.stringify(s))); },
   };
 

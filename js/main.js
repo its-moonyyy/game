@@ -23,6 +23,6 @@ if (typeof window !== 'undefined' && window.location) {
 if (typeof window !== 'undefined') {
   window.Game = {
     getSnapshot, applySnapshot, setRemoteInput, setSimEnabled,
-    setLocalPlayer,
+    setLocalPlayer, resetWorld,
   };
 }

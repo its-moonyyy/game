@@ -69,7 +69,7 @@ function leave() {
   status('');
 }
 
-async function host() {
+async function host(levelName) {
   if (typeof RTCPeerConnection === 'undefined') {
     throw new Error('webrtc unavailable');
   }
@@ -96,7 +96,7 @@ async function host() {
   await pc.setLocalDescription(offer);
   await waitGathering(pc);
   const code = Signaling.encodeInvite({ type: 'offer',
-    sdp: pc.localDescription.sdp });
+    sdp: pc.localDescription.sdp, level: levelName || 'level-1' });
   role = 'host';
   const connected = open.then(() => {
     status('connected');
@@ -161,7 +161,7 @@ async function join(codeA) {
   Sync.setActive(true);
   requestAnimationFrame(Sync.guestFrame);
   return { code: Signaling.encodeInvite({ type: 'answer',
-    sdp: pc.localDescription.sdp }) };
+    sdp: pc.localDescription.sdp }), level: offer.level || 'level-1' };
 }
 
 async function confirm(codeB) {

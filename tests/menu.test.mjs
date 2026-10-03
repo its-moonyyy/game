@@ -6,7 +6,7 @@ test('menu view toggling, selection, and status', async () => {
   const doc = makeDocument(['menu-view', 'game-view', 'menu-status',
     'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
     'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
-    'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste']);
+    'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row']);
   global.document = doc;
   global.window = {};
   doc.els['game-view'].hidden = true;
@@ -32,7 +32,7 @@ test('late Net arrival gets hooked', async () => {
   const doc = makeDocument(['menu-view', 'game-view', 'menu-status',
     'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
     'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
-    'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste']);
+    'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row']);
   global.document = doc;
   global.window = {};
   const { hookNet } = await import('../js/ui/menu.js');

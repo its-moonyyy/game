@@ -2,9 +2,17 @@
 // Produces: DOM/canvas stubs shared by all suites
 
 export function makeEl() {
-  return { hidden: false, textContent: '', value: '', innerHTML: '',
-    content: '', handlers: {},
-    addEventListener(type, fn) { this.handlers[type] = fn; } };
+  const el = { hidden: false, textContent: '', value: '',
+    content: '', children: [], handlers: {},
+    addEventListener(type, fn) { this.handlers[type] = fn; },
+    appendChild(b) { this.children.push(b); } };
+  let html = '';
+  Object.defineProperty(el, 'innerHTML', {
+    get: () => html,
+    set: (v) => { html = v; el.children.length = 0; },
+    configurable: true,
+  });
+  return el;
 }
 
 export function makeDocument(ids) {
@@ -12,7 +20,8 @@ export function makeDocument(ids) {
   for (const id of ids) els[id] = makeEl();
   return { els,
     getElementById(id) { return els[id] || null; },
-    addEventListener() {} };
+    addEventListener() {},
+    createElement() { return makeEl(); } };
 }
 
 export function makeWindow(extra = {}) {
@@ -42,4 +51,4 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const ALL_IDS = ['menu-view', 'game-view', 'menu-status',
   'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
   'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
-  'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste'];
+  'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row'];
