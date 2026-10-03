@@ -7,7 +7,24 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="menu-view">
+<h1>Co-op Capers</h1>
+<p>Play together on one screen or online on two devices.</p>
+<button id="btn-local" type="button">Same screen</button>
+<button id="btn-host" type="button">Host game</button>
+<button id="btn-join" type="button">Join game</button>
+<label for="invite-out">Your invite code</label>
+<textarea id="invite-out" readonly></textarea>
+<label for="invite-in">Friend invite code</label>
+<textarea id="invite-in"></textarea>
+<button id="btn-connect" type="button">Connect</button>
+<p id="menu-status"></p>
+<p>Online guest input lags about one round trip behind your fingers.</p>
+</div>
+<div id="game-view" hidden>
 <canvas id="game" width="960" height="540"></canvas>
+</div>
+<script src="menu.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
