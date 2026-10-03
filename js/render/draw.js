@@ -1,11 +1,17 @@
-// Consumes: Config (sizes, GROUND), World (live state), document (canvas)
-// Produces: renderAll() (draws one frame, called by render/loop.js)
+// Consumes: Config (sizes, GROUND), World (live state), view (cam, rope),
+//   document (canvas)
+// Produces: renderAll() (mountain scene with camera, or classic scene)
 
 import { W, H, GROUND } from '../config.js';
 import { World } from '../world.js';
+import { cam, rope } from './view.js';
 
 const cvs = document.getElementById('game');
 const ctx = cvs.getContext('2d');
+
+function isMountain() {
+  return !!World.level.h;
+}
 
 /* =========================================================
    Rendering helpers (all shapes, no text/DOM UI)
@@ -21,22 +27,16 @@ function rr(x, y, w, h, r) {                      // rounded rect path
 }
 
 function drawSky() {
-  const g = ctx.createLinearGradient(0, 0, 0, GROUND);
-  g.addColorStop(0, '#9fd8ff'); g.addColorStop(1, '#eaf7ff');
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#7fb2e8'); g.addColorStop(1, '#d8ecff');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#fff8d8';                       // sun
-  ctx.beginPath(); ctx.arc(880, 60, 30, 0, 7); ctx.fill();
-  ctx.fillStyle = 'rgba(255,250,220,0.35)';
-  ctx.beginPath(); ctx.arc(880, 60, 54, 0, 7); ctx.fill();
-
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';         // clouds
-  for (const [cx, cy, s] of [[140, 70, 1], [420, 46, 0.7], [640, 96, 1.3]]) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22 * s, 0, 7);
-    ctx.arc(cx + 24 * s, cy - 10 * s, 18 * s, 0, 7);
-    ctx.arc(cx + 48 * s, cy, 20 * s, 0, 7);
-    ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';         // drifting snow
+  const t = performance.now() / 1000;
+  for (let i = 0; i < 60; i++) {
+    const x = (i * 167) % W;
+    const y = (i * 89 + t * 30) % H;
+    ctx.fillRect(x, y, 2, 2);
   }
 }
 
@@ -59,7 +59,12 @@ function tile(x, y, w, h, top, face) {             // stone slab tile
 
 function drawSolids() {
   for (const s of World.level.solid) {
-    if (s.y === GROUND) {                          // the dirt floor + grass
+    if (isMountain()) {                            // snow slab + cap
+      ctx.fillStyle = '#8fa3bf'; ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.fillStyle = '#f4f8ff'; ctx.fillRect(s.x, s.y, s.w, 6);
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2;
+      ctx.strokeRect(s.x + 1, s.y + 1, s.w - 2, s.h - 2);
+    } else if (s.y === GROUND) {                   // the dirt floor + grass
       ctx.fillStyle = '#b07a4f'; ctx.fillRect(s.x, s.y, s.w, s.h);
       ctx.fillStyle = '#7ccc4f'; ctx.fillRect(s.x, s.y, s.w, 7);
       ctx.fillStyle = '#5fae39';
@@ -76,6 +81,7 @@ function drawSolids() {
 
 function drawGate() {
   const gate = World.level.gate;
+  if (!gate) return;
   const top = gate.y - gate.h * World.openAmt;      // rigid panel slides upward
   const panelTop = Math.max(top, 120);              // visible slice of the panel
   const panelBottom = Math.min(top + gate.h, GROUND);
@@ -106,6 +112,7 @@ function drawSwitches() {
 
 function drawBlock() {                             // wooden crate
   const block = World.block;
+  if (!block) return;
   ctx.fillStyle = '#c98f4b'; ctx.fillRect(block.x, block.y, block.w, block.h);
   ctx.fillStyle = '#8a5a28';
   ctx.fillRect(block.x, block.y, block.w, 5);      // rim shading
@@ -119,6 +126,18 @@ function drawBlock() {                             // wooden crate
 
 function drawGoal() {
   const goal = World.level.goal;
+  if (isMountain()) {                              // summit band + flag
+    ctx.fillStyle = 'rgba(38,208,124,0.18)';
+    ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+    ctx.fillStyle = '#1f9e63';
+    ctx.fillRect(goal.x + goal.w / 2 - 2, goal.y + 20, 4, 60);
+    ctx.fillStyle = '#ffe066';
+    ctx.fillRect(goal.x + goal.w / 2 + 2, goal.y + 20, 34, 20);
+    ctx.fillStyle = '#eaf2f8';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('SUMMIT', goal.x + goal.w / 2 - 34, goal.y + 100);
+    return;
+  }
   const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 300);
   ctx.fillStyle = 'rgba(38,208,124,0.14)';         // soft carpet on the floor
   ctx.fillRect(goal.x, GROUND - 14, goal.w, 14);
@@ -138,32 +157,37 @@ function drawGoal() {
   ctx.fillRect(cx + 12, cy - 11, 14, 6);
 }
 
-function drawPlayer(p) {
-  const glow = World.won;
-  if (glow) {                                      // victory halo
-    ctx.shadowColor = 'rgba(140,255,190,0.9)'; ctx.shadowBlur = 22;
-  }
-  ctx.fillStyle = p === World.players[0] ? '#ff5b5b' : '#5b8dff';
-  rr(p.x, p.y, p.w, p.h, 7); ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 2;
-  rr(p.x, p.y, p.w, p.h, 7); ctx.stroke();
+function drawPenguin(p, tint) {
+  ctx.fillStyle = '#2b2b3a';                       // black back
+  rr(p.x, p.y, p.w, p.h, 9); ctx.fill();
+  ctx.fillStyle = '#f4f8ff';                       // white belly
+  rr(p.x + 5, p.y + 8, p.w - 10, p.h - 8, 6); ctx.fill();
+  ctx.fillStyle = tint;
+  rr(p.x, p.y + p.h - 8, p.w, 6, 3); ctx.fill();   // scarf stripe
 
-  const ex = p.dir > 0 ? p.x + 19 : p.x + 11;      // eyes (face the run dir)
+  const ex = p.dir > 0 ? p.x + 19 : p.x + 11;      // eyes face run dir
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(ex, p.y + 16, 5.5, 0, 7); ctx.arc(ex + 10, p.y + 16, 5.5, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(ex, p.y + 14, 5.5, 0, 7); ctx.arc(ex + 10, p.y + 14, 5.5, 0, 7); ctx.fill();
   ctx.fillStyle = '#203040';
-  ctx.beginPath(); ctx.arc(ex + p.dir * 1.5, p.y + 17, 2.6, 0, 7);
-  ctx.arc(ex + 10 + p.dir * 1.5, p.y + 17, 2.6, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(ex + p.dir * 1.5, p.y + 15, 2.6, 0, 7);
+  ctx.arc(ex + 10 + p.dir * 1.5, p.y + 15, 2.6, 0, 7); ctx.fill();
+
+  const bx = p.dir > 0 ? p.x + p.w - 2 : p.x + 2;  // orange beak
+  ctx.fillStyle = '#ff9f2e';
+  ctx.beginPath();
+  ctx.moveTo(bx, p.y + 22);
+  ctx.lineTo(bx + p.dir * 9, p.y + 25);
+  ctx.lineTo(bx, p.y + 28);
+  ctx.closePath(); ctx.fill();
 }
 
-function drawRope() {
-  const rope = World.level.rope;
-  if (!rope) return;
+function drawTether() {                            // classic straight rope
+  const ropeDef = World.level.rope;
+  if (!ropeDef || isMountain()) return;
   const [a, b] = World.players;
   const ax = a.x + a.w / 2, ay = a.y + a.h / 2;
   const bx = b.x + b.w / 2, by = b.y + b.h / 2;
-  const slack = Math.max(0, rope - Math.hypot(bx - ax, by - ay));
+  const slack = Math.max(0, ropeDef - Math.hypot(bx - ax, by - ay));
   ctx.strokeStyle = '#6d4519';
   ctx.lineWidth = 3;
   ctx.beginPath();
@@ -173,7 +197,28 @@ function drawRope() {
   ctx.stroke();
 }
 
-function drawParts() {  for (const p of World.parts) {
+function drawChain() {                             // verlet rope polyline
+  ctx.strokeStyle = '#6d4519';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(rope.points[0].x, rope.points[0].y);
+  for (let i = 1; i < rope.points.length; i++) {
+    ctx.lineTo(rope.points[i].x, rope.points[i].y);
+  }
+  ctx.stroke();
+}
+
+function drawCheckpoints() {
+  for (const c of World.checkpoints) {
+    ctx.fillStyle = '#7d848d';
+    ctx.fillRect(c.x - 2, c.y - 30, 4, 30);
+    ctx.fillStyle = c.hit ? '#38d07c' : '#a8a8a8';
+    ctx.fillRect(c.x + 2, c.y - 30, 20, 12);
+  }
+}
+
+function drawParts() {
+  for (const p of World.parts) {
     ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
     ctx.fillStyle = p.col;
     ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
@@ -181,23 +226,56 @@ function drawParts() {  for (const p of World.parts) {
   ctx.globalAlpha = 1;
 }
 
+function formatTime(ms) {
+  const tenths = Math.floor(ms / 100);
+  const m = Math.floor(tenths / 600);
+  const s = Math.floor(tenths / 10) % 60;
+  const c = tenths % 10;
+  return m + ':' + String(s).padStart(2, '0') + '.' + c;
+}
+
+function drawHUD() {
+  ctx.fillStyle = '#eaf2f8';
+  ctx.font = '20px sans-serif';
+  ctx.fillText(formatTime(World.timeMs), W / 2 - 30, 30);
+  World.checkpoints.forEach((c, i) => {
+    ctx.fillStyle = c.hit ? '#38d07c' : 'rgba(234,242,248,0.4)';
+    ctx.beginPath(); ctx.arc(W / 2 - 24 + i * 24, 52, 7, 0, 7); ctx.fill();
+  });
+}
+
 function drawWin() {
   if (World.won) {                                 // green screen flash, fading
     ctx.fillStyle = `rgba(90,255,150,${0.22 * Math.sin(World.winT * 3 + 1) + 0.18})`;
     ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#eaf2f8';
+    ctx.font = '28px sans-serif';
+    ctx.fillText(formatTime(World.timeMs), W / 2 - 50, H / 2 - 10);
+    ctx.font = '18px sans-serif';
+    ctx.fillText('press R', W / 2 - 40, H / 2 + 24);
   }
 }
 
 export function renderAll() {
   drawSky();
-  drawPit();
+  ctx.save();
+  ctx.translate(0, -cam.y);
+  if (!isMountain()) drawPit();
   drawSolids();
   drawGate();
   drawSwitches();
   drawBlock();
   drawGoal();
-  for (const p of World.players) drawPlayer(p);
-  drawRope();
+  if (isMountain()) {
+    drawChain();
+    drawCheckpoints();
+  } else {
+    drawTether();
+  }
+  const tints = ['#ff5b5b', '#5b8dff'];
+  World.players.forEach((p, i) => drawPenguin(p, tints[i]));
   drawParts();
+  ctx.restore();
+  if (isMountain()) drawHUD();
   drawWin();
 }

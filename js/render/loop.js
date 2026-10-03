@@ -6,6 +6,9 @@ import { updatePlayers, updateBlock } from '../sim/physics.js';
 import { updateSwitches, updateWin, updateCheckpoints, updateFallRespawn,
   updateSummit, updateChrono } from '../sim/rules.js';
 import { updateParts } from '../sim/particles.js';
+import { stepRope } from '../sim/rope.js';
+import { updateCamera } from './camera.js';
+import { cam, rope } from './view.js';
 import { renderAll } from './draw.js';
 
 let simEnabled = true;   // guest mode never disables this anymore,
@@ -29,6 +32,11 @@ export function update(dt) {
     updateWin(dt);
   }
   updateParts(dt);
+  const [a, b] = World.players;
+  const maxLen = World.level.rope || 140;
+  stepRope(rope, a.x + a.w / 2, a.y + a.h / 2,
+    b.x + b.w / 2, b.y + b.h / 2, maxLen);
+  updateCamera(cam, a, b, dt, World.level.h || 540);
 }
 
 export function setSimEnabled(on) {
