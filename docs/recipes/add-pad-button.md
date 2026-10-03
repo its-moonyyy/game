@@ -1,7 +1,7 @@
 # Recipe: add a pad button
 
-Pads live in `touch.js` (`TouchPad.mount`), styled in `style.css`
-(`.touch-pad`, shown only on `pointer: coarse`).
+Pads live in `js/input/touch.js` (`TouchPad.mount`), styled in
+`css/gamepad.css` (`.touch-pad`, shown only on `pointer: coarse`).
 
 1. Add the button in `mount` next to left/right/jump, tracking its
    own touch id like the others.

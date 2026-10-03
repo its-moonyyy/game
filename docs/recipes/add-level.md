@@ -1,14 +1,12 @@
 # Recipe: add a level
 
-Today there is one level, defined inline in `game.js` (`SOLID`,
-`GATE`, `SWITCHES`, `GOAL`, `SPAWN`, `block` start). Until the
-`levels/` split lands, a new level means new data next to it.
+Levels are data-only files in `js/levels/`, registered in
+`js/levels/index.js`. Spots are validated by `tests/levels.test.mjs`.
 
-1. Copy the level block in `game.js` and tweak coordinates.
-   Keep the pit/world bounds (`W`, `H`, `GROUND`).
-2. Play it locally: `npm run serve`, open the page, pick Same screen.
-3. Prove it: `npm test` (all suites green).
-
-After the `levels/` split: copy `js/levels/level-1.js` to
-`js/levels/level-2.js`, add one entry to `js/levels/index.js`,
-select it with `?level=2`. Same proof command.
+1. Copy `js/levels/level-1.js` to `js/levels/level-2.js` and tweak
+   coordinates. Keep inside the world bounds (`W`, `H`, `GROUND`
+   in `js/config.js`).
+2. Add one entry to the registry in `js/levels/index.js`.
+3. Play it: `npm run serve`, open `http://localhost:8903/` and pick
+   Same screen (or jump straight in with `?level=level-2`).
+4. Prove it: `npm test` (all suites green).
