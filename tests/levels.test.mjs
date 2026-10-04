@@ -5,7 +5,8 @@ import { buildWorld } from '../js/world.js';
 
 test('level registry and world factory', () => {
   const names = Levels.list().map((l) => l.name);
-  assert.deepEqual(names, ['mountain-1']);
+  assert.deepEqual(names, ['level-1', 'level-2', 'level-3', 'level-4',
+    'mountain-1']);
   const level = Levels.get('mountain-1');
   assert.equal(level.name, 'mountain-1');
   assert.ok(level.solid.length > 0, 'has solids');

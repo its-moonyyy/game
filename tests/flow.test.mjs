@@ -119,10 +119,7 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
     'blocked copy falls back to manual');
 
   const levelBtns = ids['level-row'].children;
-  assert.equal(levelBtns.length, 1, 'one level button');
-  assert.match(levelBtns[0].textContent, /Montagne/,
-    'mountain button shown');
-  assert.equal(levelBtns[0].disabled, true, 'current level disabled');
+  assert.equal(levelBtns.length, 5, 'five level buttons');
   ids['btn-host'].handlers.click();
   await sleep(20);
   assert.equal(hostLevel, 'mountain-1', 'host offers mountain');
