@@ -1,5 +1,5 @@
 // Consumes: nothing
-// Produces: canvas/world/physics constants, player input maps (CFG)
+// Produces: canvas/world/physics constants, player input maps (keyCfgs)
 
 export const W = 960, H = 540;
 
@@ -11,7 +11,30 @@ export const BOOST = 864;           // boosted jump velocity px/s (off a friend'
 export const PW = 36, PH = 40;      // player size
 export const BW = 40;               // pushable block size (square)
 
-export const CFG = [
-  { left: 'q', right: 'd', jump: 'z' },
-  { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' },
-];
+const KEYMAPS = {
+  azerty: [
+    { left: 'q', right: 'd', jump: 'z' },
+    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' },
+  ],
+  qwerty: [
+    { left: 'a', right: 'd', jump: 'w' },
+    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' },
+  ],
+};
+
+let currentLayout = 'azerty';
+
+export function setKeyLayout(name) {
+  if (KEYMAPS[name]) currentLayout = name;
+}
+
+export function keyLayout() {
+  return currentLayout;
+}
+
+export function keyCfgs() {
+  return KEYMAPS[currentLayout];
+}
+
+// Legacy alias (azerty); prefer keyCfgs().
+export const CFG = KEYMAPS.azerty;

@@ -118,6 +118,12 @@ test('menu flows: local, host, join errors, viewport, overlay, clipboard, guest 
   assert.match(ids['menu-status'].textContent, /manually/,
     'blocked copy falls back to manual');
 
+  ids['btn-layout-qwerty'].handlers.click();
+  assert.equal(ids['btn-layout-qwerty'].disabled, true, 'qwerty selected');
+  assert.equal(ids['btn-layout-azerty'].disabled, false, 'azerty unselected');
+  ids['btn-layout-azerty'].handlers.click();
+  assert.equal(ids['btn-layout-azerty'].disabled, true, 'back to azerty');
+
   const levelBtns = ids['level-row'].children;
   assert.equal(levelBtns.length, 5, 'five level buttons');
   ids['btn-host'].handlers.click();

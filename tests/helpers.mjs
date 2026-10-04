@@ -55,4 +55,5 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const ALL_IDS = ['game', 'menu-view', 'game-view', 'menu-status',
   'btn-local', 'btn-host', 'btn-join', 'btn-connect', 'invite-out',
   'invite-in', 'pad-p1', 'pad-p2', 'viewport', 'net-overlay',
-  'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row'];
+  'net-overlay-text', 'btn-exit', 'btn-copy', 'btn-paste', 'level-row',
+  'btn-layout-azerty', 'btn-layout-qwerty'];

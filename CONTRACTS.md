@@ -27,7 +27,9 @@ in this file, update this file in the same commit.
 
 ## Input slots
 
-- P1 (host-owned): `a` / `d` / `w`. P2 (guest-owned): arrows.
+- P1 (host-owned): AZERTY `q` / `d` / `z`, or QWERTY `a` / `d` / `w`
+  after the menu layout switch (`keyLayout` in `js/config.js`,
+  persisted in localStorage). P2 (guest-owned): arrows either way.
 - The built-in keyboard only writes the local player's slots
   (`Game.setLocalPlayer`: `0` host, `-1` guest, `null` same screen).
 - Guest pads and guest keys both end in `Net.sendInput`; the host

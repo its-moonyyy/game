@@ -1,16 +1,16 @@
-// Consumes: Config (sizes, CFG), Levels (static geometry)
+// Consumes: Config (sizes, keyCfgs), Levels (static geometry)
 // Produces: buildWorld(level), World (live singleton), resetWorld,
 //   getSnapshot, applySnapshot (snapshot protocol v2, see CONTRACTS.md)
 
 import { PW, PH, BW } from './config.js';
-import { CFG } from './config.js';
+import { keyCfgs } from './config.js';
 import { Levels } from './levels/index.js';
 import { cam } from './render/view.js';
 
 export function buildWorld(level) {
   return {
     level,
-    players: CFG.map((cfg, i) => ({
+    players: keyCfgs().map((cfg, i) => ({
       cfg, x: level.spawn[i].x, y: level.spawn[i].y, w: PW, h: PH,
       vx: 0, vy: 0, gnd: false, onHead: false,
       dir: 1, jumpBuf: 0, ropeHold: 0, grab: false, stamina: 0,

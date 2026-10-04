@@ -4,9 +4,8 @@
 
 import { Clipboard } from './clipboard.js';
 import { Levels } from '../levels/index.js';
+import { setKeyLayout, keyCfgs, keyLayout } from '../config.js';
 
-const P1_MAP = { left: 'q', right: 'd', jump: 'z' };
-const P2_MAP = { left: 'arrowleft', right: 'arrowright', jump: 'arrowup' };
 const NO_INPUT = { left: false, right: false, jump: false };
 const GUEST_KEYS = { arrowleft: 'left', arrowright: 'right', arrowup: 'jump' };
 let role = null;
@@ -78,8 +77,8 @@ function startLocal() {
     window.Game.setLocalPlayer(null);
   }
   show('game');
-  mountPad('pad-p1', P1_MAP);
-  mountPad('pad-p2', P2_MAP);
+  mountPad('pad-p1', keyCfgs()[0]);
+  mountPad('pad-p2', keyCfgs()[1]);
 }
 
 function startHost() {
@@ -156,9 +155,9 @@ function onOpen(openedRole) {
     if (window.Net) {
       window.Net.ready(true);
     }
-    mountPad('pad-p1', P2_MAP, (input) => window.Net.sendInput(input));
+    mountPad('pad-p1', keyCfgs()[1], (input) => window.Net.sendInput(input));
   } else {
-    mountPad('pad-p1', P1_MAP);
+    mountPad('pad-p1', keyCfgs()[0]);
   }
 }
 
@@ -192,10 +191,42 @@ function select(mode) {
   }
 }
 
+function readSavedLayout() {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const name = localStorage.getItem('keyLayout');
+    return name === 'azerty' || name === 'qwerty' ? name : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function renderLayoutButtons() {
+  for (const name of ['azerty', 'qwerty']) {
+    const btn = el('btn-layout-' + name);
+    if (btn) btn.disabled = keyLayout() === name;
+  }
+}
+
+function selectLayout(name) {
+  setKeyLayout(name);
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('keyLayout', name);
+    }
+  } catch (e) {}
+  renderLayoutButtons();
+}
+
 function bind() {
   selectedLevel = selectedLevelFromUrl();
+  const saved = readSavedLayout();
+  if (saved) setKeyLayout(saved);
   if (window.Game) window.Game.resetWorld(selectedLevel);
   renderLevels();
+  renderLayoutButtons();
+  el('btn-layout-azerty').addEventListener('click', () => selectLayout('azerty'));
+  el('btn-layout-qwerty').addEventListener('click', () => selectLayout('qwerty'));
   el('btn-local').addEventListener('click', () => select('local'));
   el('btn-host').addEventListener('click', () => select('host'));
   el('btn-join').addEventListener('click', () => select('join'));
